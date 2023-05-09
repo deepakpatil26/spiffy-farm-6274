@@ -1,0 +1,24 @@
+.product-card {
+  position: relative;
+  margin: 20px;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.add-to-cart-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  background-color: #ff8800;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  transform: translateY(100%);
+}
+
+.product-card:hover > .add-to-cart-btn {
+  transform: translateY(0);
+}
