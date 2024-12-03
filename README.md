@@ -2,7 +2,7 @@
 
 ## 🌟 Project Showcase: Reimagining Online Fashion Shopping
 
-![Project Banner](https://github.com/deepakpatil26/spiffy-farm-6274/blob/main/src/Asssets/LogoI.png)
+![Project Logo](https://github.com/deepakpatil26/spiffy-farm-6274/blob/main/src/Asssets/logo2.png)
 
 ### 💡 Project Vision
 Introducing a meticulously crafted clone of Lifestyle Stores - India's premier fashion marketplace, bringing the ultimate shopping experience to your fingertips!
