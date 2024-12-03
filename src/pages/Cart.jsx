@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-lone-blocks */
 import React, { useEffect } from "react";
 import {
   Box,
@@ -136,14 +138,9 @@ export const Cart = () => {
             </Thead>
 
             {cartItems.length === 0 ? (
-              <Heading
-                padding={"100px"}
-                alignItems={"center"}
-                margin={"auto"}
-                textAlign={"center"}
-              >
-                Your Basket Is Empty
-              </Heading>
+              <Box padding={"100px"} textAlign={"center"}>
+                <Heading>Your Basket Is Empty</Heading>
+              </Box>
             ) : (
               <Tbody>
                 {cartItems?.map((e) => {

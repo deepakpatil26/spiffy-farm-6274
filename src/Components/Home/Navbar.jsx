@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
   Flex,
@@ -44,6 +45,7 @@ const Navbar = () => {
         console.log(err);
       });
   }, [cartItems]);
+
   return (
     <Box
       position={"sticky"}
