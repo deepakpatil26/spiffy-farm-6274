@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-lone-blocks */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Table,
@@ -16,6 +15,8 @@ import {
   Heading,
   Image,
   useToast,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router";
@@ -30,263 +31,231 @@ import axios from "axios";
 import Navbar from "../Components/Home/Navbar";
 import Footer from "../Components/Home/Footer";
 
+const API_BASE_URL = "https://lifestyle-mock-server-api.onrender.com";
+
 export const Cart = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const { cartItems } = useSelector((store) => store.cartReducer);
 
-  let saved = 0;
-  const getData = () => {
-    axios
-      .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
-      .then((res) => {
-        dispatch(addToCart(res.data));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  const showErrorToast = (message) => {
+    toast({
+      title: "Error",
+      description: message,
+      status: "error",
+      duration: 3000,
+      position: "top",
+      isClosable: true,
+    });
   };
 
-  const handleDelete = (e) => {
-    let { id, title } = e;
-    axios
-      .delete(`https://lifestyle-mock-server-api.onrender.com/cart/${id}`)
-      .then((res) => {
-        dispatch(removeFromCart(id));
-        toast({
-          title: `${title}`,
-          description: "Deleted from Cart",
-          status: "success",
-          duration: 2000,
-          position: "top",
-          isClosable: true,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  const getData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/cart`);
+      dispatch(addToCart(response.data));
+    } catch (error) {
+      setError("Failed to fetch cart items");
+      showErrorToast("Failed to load cart items. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleINC = (id, VAL) => {
-    console.log(id, VAL);
-    axios
-      .patch(`https://lifestyle-mock-server-api.onrender.com/cart/${id}`, {
-        quantity: VAL,
-      })
-      .then((res) => {
-        dispatch(incrementQuantity(id));
-        getData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const handleDEC = (id, VAL) => {
-    console.log(id, VAL);
-    axios
-      .patch(`https://lifestyle-mock-server-api.onrender.com/cart/${id}`, {
-        quantity: VAL,
-      })
-      .then((res) => {
-        dispatch(decrementQuantity(id));
-        getData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, e) => total + e.price * e.quantity, 0);
-  };
   useEffect(() => {
     getData();
   }, []);
 
+  const handleDelete = async (item) => {
+    const { id, title } = item;
+    setIsLoading(true);
+    try {
+      await axios.delete(`${API_BASE_URL}/cart/${id}`);
+      dispatch(removeFromCart(id));
+      toast({
+        title: "Item Removed",
+        description: `${title} has been removed from your cart`,
+        status: "success",
+        duration: 2000,
+        position: "top",
+        isClosable: true,
+      });
+    } catch (error) {
+      showErrorToast("Failed to remove item. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateQuantity = async (id, newQuantity, action) => {
+    if (newQuantity < 1) return;
+    setIsLoading(true);
+    try {
+      await axios.patch(`${API_BASE_URL}/cart/${id}`, {
+        quantity: newQuantity,
+      });
+      if (action === 'increment') {
+        dispatch(incrementQuantity(id));
+      } else {
+        dispatch(decrementQuantity(id));
+      }
+    } catch (error) {
+      showErrorToast("Failed to update quantity. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleINC = (id, currentQuantity) => {
+    updateQuantity(id, currentQuantity + 1, 'increment');
+  };
+
+  const handleDEC = (id, currentQuantity) => {
+    if (currentQuantity > 1) {
+      updateQuantity(id, currentQuantity - 1, 'decrement');
+    }
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => {
+      return total + (item.price * item.quantity);
+    }, 0);
+  };
+
+  const getSavedAmount = () => {
+    return cartItems.reduce((total, item) => {
+      return total + ((item.actualPrice - item.price) * item.quantity);
+    }, 0);
+  };
+
+  if (isLoading && !cartItems.length) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh">
+          <Spinner size="xl" color="blue.500" />
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error && !cartItems.length) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh" flexDirection="column">
+          <Text color="red.500" mb={4}>{error}</Text>
+          <Button onClick={getData} colorScheme="blue">
+            Try Again
+          </Button>
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!cartItems.length) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh" flexDirection="column">
+          <Text fontSize="xl" mb={4}>Your cart is empty</Text>
+          <Button onClick={() => navigate("/")} colorScheme="blue">
+            Continue Shopping
+          </Button>
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
-      <Box width="100%">
-        <Text
-          fontSize={"24px"}
-          textAlign={"left"}
-          fontWeight={300}
-          borderBottom={"1px solid #e8e8e8"}
-          pb={"6px"}
-        >
-          YOUR BASKET
-        </Text>
-        <TableContainer width="99%">
+      <Box p={4}>
+        <Heading textAlign="center" mb={6}>Shopping Cart</Heading>
+        <TableContainer>
           <Table variant="simple">
-            <Thead width="99%">
-              <Tr
-                bg={"#555555"}
-                color={"white"}
-                justifyContent={"space-between"}
-              >
-                <Th color={"white"}>ITEM DESCRIPTION</Th>
-                <Th color={"white"}>UNIT PRICE</Th>
-                <Th color={"white"}>QUANTITY</Th>
-                <Th color={"white"}>SUBTOTAL</Th>
-                <Th color={"#555555"}>......</Th>
-                <Th color={"black"} bg={"#c6cc74"}>
-                  Saving
-                </Th>
+            <Thead>
+              <Tr>
+                <Th>Product</Th>
+                <Th>Price</Th>
+                <Th>Quantity</Th>
+                <Th>Total</Th>
+                <Th>Remove</Th>
               </Tr>
             </Thead>
-
-            {cartItems.length === 0 ? (
-              <Box padding={"100px"} textAlign={"center"}>
-                <Heading>Your Basket Is Empty</Heading>
-              </Box>
-            ) : (
-              <Tbody>
-                {cartItems?.map((e) => {
-                  {
-                    saved =
-                      saved +
-                      (Math.floor(e.price) -
-                        Math.floor(e.price - (10 * e.price) / 100)) *
-                        e.quantity;
-                  }
-                  return (
-                    <Tr
-                      key={e.id}
-                      fontSize={"12px"}
-                      justifyContent={"space-between"}
+            <Tbody>
+              {cartItems.map((item) => (
+                <Tr key={item.id}>
+                  <Td>
+                    <Flex align="center">
+                      <Image src={item.image} alt={item.title} boxSize="50px" objectFit="cover" mr={4} />
+                      <Text>{item.title}</Text>
+                    </Flex>
+                  </Td>
+                  <Td>₹{item.price}</Td>
+                  <Td>
+                    <Flex align="center">
+                      <Button
+                        size="sm"
+                        onClick={() => handleDEC(item.id, item.quantity)}
+                        isDisabled={item.quantity <= 1 || isLoading}
+                      >
+                        -
+                      </Button>
+                      <Text mx={2}>{item.quantity}</Text>
+                      <Button
+                        size="sm"
+                        onClick={() => handleINC(item.id, item.quantity)}
+                        isDisabled={isLoading}
+                      >
+                        +
+                      </Button>
+                    </Flex>
+                  </Td>
+                  <Td>₹{item.price * item.quantity}</Td>
+                  <Td>
+                    <Button
+                      colorScheme="red"
+                      size="sm"
+                      onClick={() => handleDelete(item)}
+                      isDisabled={isLoading}
                     >
-                      <Td fontSize={"12px"}>
-                        {" "}
-                        <Image
-                          width={"100px"}
-                          height={"100px"}
-                          src={e.image}
-                          alt="Dan Abramov"
-                        />
-                        {e.brand}
-                        <br></br>
-                        {e.title}
-                      </Td>
-                      <Td>
-                        <Text>Original Price</Text>
-                        <span textDecoration={"line-through"}>
-                          Rs {Math.floor(e.price)}
-                        </span>
-                        <br></br>
-                        <Text>Discounted Price</Text>
-                        Rs {Math.floor(e.price - (10 * e.price) / 100)}
-                        <br></br>
-                      </Td>
-                      <Td>
-                        <Button
-                          isDisabled={e.quantity === 1}
-                          variant={"outline"}
-                          m={"2px"}
-                          onClick={() => handleDEC(e.id, e.quantity - 1)}
-                        >
-                          -
-                        </Button>
-                        <Button variant={"outline"} m={"2px"}>
-                          {e.quantity}
-                        </Button>
-                        <Button
-                          variant={"outline"}
-                          m={"2px"}
-                          onClick={() => handleINC(e.id, e.quantity + 1)}
-                        >
-                          +
-                        </Button>
-                      </Td>
-                      <Td>
-                        Rs{" "}
-                        {Math.floor(e.price - (10 * e.price) / 100) *
-                          e.quantity}
-                      </Td>
-                      <Td>
-                        <CloseIcon onClick={() => handleDelete(e)} />
-                      </Td>
-                      <Td>
-                        {" "}
-                        Rs{" "}
-                        {Math.floor(
-                          e.price - Math.floor(e.price - (10 * e.price) / 100)
-                        ) * e.quantity}
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            )}
+                      <CloseIcon />
+                    </Button>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
           </Table>
         </TableContainer>
-        <Flex justifyContent={"space-between"} mt={8}>
-          {/* <Box width={"45%"}>
-              <Button variant={"outline"} float={"left"} onClick={handleEmpty}>
-                Empty Basket
-              </Button>
-            </Box> */}
-          <Box width={"45%"} border="1px solid #e8e8e8 ">
-            <Flex
-              justifyContent={"space-between"}
-              p="1rem"
-              textAlign={"left"}
-              fontSize="14px"
-              fontWeight={400}
-            >
-              <Box>
-                <Text>SubTotal</Text>
-                <Text>Delivery Charges</Text>
-              </Box>
-              <Box>
-                <Text>Rs {getTotalPrice() - saved}</Text>
-                <Text>***</Text>
-              </Box>
-              <Box borderLeft={"1px solid #e8e8e8"} color="red" pl="2px">
-                <Text>You saved!</Text>
-                <Text>Rs {Math.floor(saved)}</Text>
-              </Box>
-            </Flex>
-            <Flex
-              textAlign={"left"}
-              border={"1px solid #e8e8e8"}
-              padding="2rem"
-              justify={"space-around"}
-            >
-              <Heading as={"h6"} fontWeight="250">
-                TOTAL{" "}
-              </Heading>
-              <Heading as={"h6"} fontWeight="250">
-                {" "}
-                RS {getTotalPrice() - saved}
-              </Heading>
-            </Flex>
-            <Box float={"right"}>
-              <Button
-                variant={"outline"}
-                onClick={() => {
-                  if (cartItems.length !== 0) {
-                    navigate("/checkout");
-                  } else {
-                    toast({
-                      title: "Cart is Empty.",
-                      description: "Please add some products.",
-                      status: "error",
-                      duration: 2000,
-                      isClosable: true,
-                      position: "top",
-                    });
-                    navigate("/");
-                  }
-                }}
-              >
-                {" "}
-                CheckOut
-              </Button>
-            </Box>
-          </Box>
-        </Flex>
+
+        <Box mt={6} p={4} borderWidth={1} borderRadius="lg">
+          <Flex justify="space-between" mb={4}>
+            <Text>Subtotal:</Text>
+            <Text>₹{getTotalPrice()}</Text>
+          </Flex>
+          <Flex justify="space-between" mb={4}>
+            <Text>You Save:</Text>
+            <Text color="green.500">₹{getSavedAmount()}</Text>
+          </Flex>
+          <Button
+            colorScheme="blue"
+            size="lg"
+            width="full"
+            onClick={() => navigate("/checkout")}
+            isDisabled={isLoading}
+          >
+            Proceed to Checkout
+          </Button>
+        </Box>
       </Box>
       <Footer />
     </>

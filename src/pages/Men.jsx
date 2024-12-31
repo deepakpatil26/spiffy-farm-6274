@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { getmens } from "../redux/MenReducer/action";
-import { Box, Grid, Progress, Spinner, Text } from "@chakra-ui/react";
+import { Box, Grid, Progress, Spinner, Text, Button, Center, Alert, AlertIcon, AlertTitle, AlertDescription } from "@chakra-ui/react";
 import Card from "../Components/Card";
 import Pagination1 from "../Components/Filter/Pagination1";
 import Navbar from "../Components/Home/Navbar";
@@ -14,12 +16,11 @@ export const Men = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const { men, isLoading, isError, total } = useSelector((store) => {
-    return store.MenReducer;
-  });
+  const { men, isLoading, isError, total } = useSelector((store) => store.MenReducer);
 
-  let Obj = {
+  const queryParams = {
     params: {
       category: searchParams.getAll("category"),
       _page: searchParams.get("page"),
@@ -29,14 +30,52 @@ export const Men = () => {
   };
 
   useEffect(() => {
-    dispatch(getmens(Obj));
-    console.log(total);
-  }, [location.search]);
+    dispatch(getmens(queryParams));
+  }, [location.search, dispatch, queryParams.params.category, queryParams.params._page, queryParams.params._order]);
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh">
+          <Spinner
+            thickness="4px"
+            speed="0.65s"
+            emptyColor="gray.200"
+            color="blue.500"
+            size="xl"
+          />
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <>
+        <Navbar />
+        <Box p={4}>
+          <Alert status="error">
+            <AlertIcon />
+            <AlertTitle>Error!</AlertTitle>
+            <AlertDescription>
+              Something went wrong while loading the products.
+              <Button ml={4} colorScheme="red" onClick={() => dispatch(getmens(queryParams))}>
+                Try Again
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </Box>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <div>
       <Navbar />
-      <Box>
+      <Box position="relative">
         <Progress
           colorScheme="pink"
           hasStripe
@@ -54,24 +93,16 @@ export const Men = () => {
           New arrivals in menswear upto 30% off ❤️
         </Text>
       </Box>
+
       <Menfilter type={"men"} />
-      {isLoading ? (
-        <Box
-          textAlign={"center"}
-          width={"100%"}
-          height={"400px"}
-          paddingTop="150px"
-        >
-          <Spinner
-            thickness="4px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="blue.500"
-            size="xl"
-          />
+
+      {men.length === 0 ? (
+        <Box textAlign="center" py={10}>
+          <Text fontSize="xl" mb={4}>No products found</Text>
+          <Button colorScheme="blue" onClick={() => navigate("/")}>
+            Continue Shopping
+          </Button>
         </Box>
-      ) : isError ? (
-        "Something went wrong"
       ) : (
         <Grid
           width={"80%"}
@@ -84,13 +115,15 @@ export const Men = () => {
             lg: "repeat(4,1fr)",
           }}
           columnGap="20px"
+          rowGap="20px"
+          py={6}
         >
-          {men.length > 0 &&
-            men.map((el) => {
-              return <Card key={el.id} {...el} id={el.id} type={"men"} />;
-            })}
+          {men.map((product) => (
+            <Card key={product.id} {...product} id={product.id} type={"men"} />
+          ))}
         </Grid>
       )}
+
       <Pagination1 />
       <Box mt={"30px"}>
         <Footer />

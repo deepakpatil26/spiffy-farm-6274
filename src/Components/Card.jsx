@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Box,
   Button,
@@ -8,13 +9,15 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import "./Card.css";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 const Card = ({ actualPrice, type, id, image, price, title, discount }) => {
   const toast = useToast();
-  let el = {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const el = {
     actualPrice,
     type,
     image,
@@ -23,33 +26,42 @@ const Card = ({ actualPrice, type, id, image, price, title, discount }) => {
     discount,
     quantity: 1,
   };
-  const handleClick = () => {
-    axios
-      .post(`https://lifestyle-mock-server-api.onrender.com/cart`, el)
-      .then((res) => {
-        toast({
-          title: "Added to cart",
-          description: "You can checkout from Cart",
-          status: "success",
-          position: "top",
-          duration: 1000,
-          isClosable: true,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+
+  const handleClick = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post(`https://lifestyle-mock-server-api.onrender.com/cart`, el);
+      toast({
+        title: "Added to cart",
+        description: "You can checkout from Cart",
+        status: "success",
+        position: "top",
+        duration: 1000,
+        isClosable: true,
       });
+    } catch (error) {
+      toast({
+        title: "Error adding to cart",
+        description: "Please try again",
+        status: "error",
+        position: "top",
+        duration: 1000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <Box
       className="product-card"
-      // borderRadius={"20px"}
       width={"100%"}
       textAlign="left"
       height={"520px"}
     >
       <Link to={`/${type}/${id}`}>
-        <Image borderRadius={"20px"} src={image}></Image>
+        <Image borderRadius={"20px"} src={image} alt={title} />
         <Flex gap={"5px"} textAlign={"center"}>
           <Heading paddingTop={"8px"} size="md">
             ₹{price}
@@ -59,10 +71,15 @@ const Card = ({ actualPrice, type, id, image, price, title, discount }) => {
           </Text>
         </Flex>
         <Text paddingTop={"3px"} fontSize={"14px"}>
-          {title}{" "}
+          {title}
         </Text>
       </Link>
-      <Button class="add-to-cart-btn" onClick={handleClick}>
+      <Button 
+        className="add-to-cart-btn" 
+        onClick={handleClick}
+        isLoading={isLoading}
+        loadingText="Adding..."
+      >
         Add To Cart
       </Button>
     </Box>

@@ -26,6 +26,7 @@ const initialState = {
   ExpiringDate: "",
   cvv: "",
 };
+
 function Payment() {
   const toast = useToast();
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ function Payment() {
       saved +
       (Math.floor(item.price) -
         Math.floor(item.price - (10 * item.price) / 100)) *
-        item.quantity;
+      item.quantity;
   });
 
   const handlePaymentOptionChange = (value) => {
@@ -54,10 +55,11 @@ function Payment() {
     const value = e.target.value;
     setData((prevState) => ({ ...prevState, [name]: value }));
   };
-  console.log(data);
+
   const getTotalPrice = () => {
     return cartItems.reduce((total, e) => total + e.price * e.quantity, 0);
   };
+
   const handlePaymentSubmit = (event) => {
     // Handle payment submission logic here
     event.preventDefault();
@@ -98,6 +100,7 @@ function Payment() {
       });
     }
   };
+
   const handlePay = (e) => {
     e.preventDefault();
 
@@ -409,7 +412,7 @@ function Payment() {
                 either a 256-bit or 128-bit SSL certificate depending on your
                 browser version.
               </Text>
-              <Text mb="10px">© 2021 RNA Intellectual Property Limited.</Text>
+              <Text mb="10px"> 2021 RNA Intellectual Property Limited.</Text>
               <Text mb="10px">
                 Privacy Policy-Terms of Use- Terms & Condition{" "}
               </Text>

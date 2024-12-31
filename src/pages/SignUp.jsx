@@ -70,6 +70,28 @@ export default function Signup() {
   }, [createError, toast]);
 
   function SignupRequest() {
+    if (!email || !firstName || !lastName || !password) {
+      toast({
+        title: "Please fill all fields",
+        status: "error",
+        duration: 1500,
+        position: "top",
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Password must be at least 6 characters",
+        status: "error",
+        duration: 1500,
+        position: "top",
+        isClosable: true,
+      });
+      return;
+    }
+
     let checkAlready = false;
 
     userObj.length > 0 &&
@@ -144,7 +166,7 @@ export default function Signup() {
             </Heading>
 
             <Text fontSize={"lg"} color={"gray.600"}>
-              Welcome to OutFit Store ✌️
+              Welcome to OutFit Store 
             </Text>
           </Stack>
 

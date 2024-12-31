@@ -1,6 +1,8 @@
-import React from "react";
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Single.css";
 import {
   Box,
@@ -14,10 +16,9 @@ import {
   SimpleGrid,
   StackDivider,
   useColorModeValue,
-  List,
-  ListItem,
   Grid,
   useToast,
+  Center,
 } from "@chakra-ui/react";
 import { MdLocalShipping } from "react-icons/md";
 import axios from "axios";
@@ -26,17 +27,35 @@ import Navbar from "./Home/Navbar";
 
 const Singlecardwomen = () => {
   const { id } = useParams();
-  console.log(+id - 1);
+  const navigate = useNavigate();
   const toast = useToast();
-  const { women } = useSelector((store) => {
-    return store.MenReducer;
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [el] = women.filter((el) => {
-    return el.id === id;
-  });
-  let { actualPrice, type, image, price, title, discount } = el;
-  let obj = {
+  const { women } = useSelector((store) => store.MenReducer);
+
+  // Find the product
+  const product = women.find((item) => item.id === id);
+
+  // Handle missing product
+  if (!product) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh" flexDirection="column">
+          <Text fontSize="xl" mb={4}>Product not found</Text>
+          <Button colorScheme="blue" onClick={() => navigate("/women")}>
+            Return to Women's Collection
+          </Button>
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
+  const { actualPrice, type, image, price, title, discount } = product;
+
+  const cartItem = {
     actualPrice,
     type,
     image,
@@ -45,25 +64,50 @@ const Singlecardwomen = () => {
     discount,
     quantity: 1,
   };
-  console.log(el);
-  const handleAdd = () => {
-    axios
-      .post(`https://lifestyle-mock-server-api.onrender.com/cart`, obj)
-      .then((res) => {
-        toast({
-          title: "Added to cart",
-          description: "You can checkout from Cart",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top",
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+
+  const handleAdd = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await axios.post(`https://lifestyle-mock-server-api.onrender.com/cart`, cartItem);
+      toast({
+        title: "Added to cart",
+        description: "You can checkout from Cart",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
       });
+    } catch (error) {
+      setError(error.message);
+      toast({
+        title: "Error adding to cart",
+        description: error.message || "Please try again later",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  console.log(el);
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <Center h="50vh" flexDirection="column">
+          <Text fontSize="xl" color="red.500" mb={4}>{error}</Text>
+          <Button colorScheme="blue" onClick={() => setError(null)}>
+            Try Again
+          </Button>
+        </Center>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -82,8 +126,8 @@ const Singlecardwomen = () => {
               <Image
                 className="hoverimage"
                 rounded={"md"}
-                alt={"product image"}
-                src={el.img1}
+                alt={title}
+                src={product.img1}
                 fit={"cover"}
                 align={"center"}
                 w={"100%"}
@@ -94,8 +138,8 @@ const Singlecardwomen = () => {
               <Image
                 className="hoverimage"
                 rounded={"md"}
-                alt={"product image"}
-                src={el.img2}
+                alt={title}
+                src={product.img2}
                 fit={"cover"}
                 align={"center"}
                 w={"100%"}
@@ -106,8 +150,8 @@ const Singlecardwomen = () => {
               <Image
                 className="hoverimage"
                 rounded={"md"}
-                alt={"product image"}
-                src={el.img3}
+                alt={title}
+                src={product.img3}
                 fit={"cover"}
                 align={"center"}
                 w={"100%"}
@@ -118,8 +162,8 @@ const Singlecardwomen = () => {
               <Image
                 className="hoverimage"
                 rounded={"md"}
-                alt={"product image"}
-                src={el.img4}
+                alt={title}
+                src={product.img4}
                 fit={"cover"}
                 align={"center"}
                 w={"100%"}
@@ -127,6 +171,7 @@ const Singlecardwomen = () => {
               />
             </Box>
           </Grid>
+
           <Stack spacing={{ base: 6, md: 10 }}>
             <Box as={"header"}>
               <Heading
@@ -134,27 +179,14 @@ const Singlecardwomen = () => {
                 fontWeight={600}
                 fontSize={{ base: "2xl", sm: "4xl", lg: "5xl" }}
               >
-                {el.title}
+                {title}
               </Heading>
               <Text
                 color={useColorModeValue("gray.900", "gray.400")}
                 fontWeight={300}
                 fontSize={"2xl"}
               >
-                ${el.price} USD Inclusive of all taxes
-              </Text>
-              <Text
-                as="del"
-                color={useColorModeValue("gray.900", "gray.400")}
-                fontWeight={300}
-                fontSize={"xl"}
-              >
-                ${el.actualPrice}
-              </Text>{" "}
-              <span>Save ₹ 1500 (50.02%)</span>
-              <Text />
-              <Text color={"#ff8800"} fontWeight={300}>
-                ★★★★☆
+                ₹{price}
               </Text>
             </Box>
 
@@ -168,102 +200,10 @@ const Singlecardwomen = () => {
               }
             >
               <VStack spacing={{ base: 4, sm: 6 }}>
-                <Text
-                  color={useColorModeValue("gray.500", "gray.400")}
-                  fontSize={"2xl"}
-                  fontWeight={"300"}
-                >
-                  Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
-                  diam nonumy eirmod tempor invidunt ut labore
-                </Text>
                 <Text fontSize={"lg"}>
-                  Keep your look simple yet stylish by wearing this graceful
-                  perky A-line piece designed with embroidery on the surface.
-                  The outfit boasts a round neck, three-quarter sleeves, and a
-                  curved hemline. Style with a pair of jhumkas and bangles and
-                  you are good to go.
+                  {type}
                 </Text>
               </VStack>
-              <Box>
-                <Text
-                  fontSize={{ base: "16px", lg: "18px" }}
-                  color={useColorModeValue("yellow.500", "yellow.300")}
-                  fontWeight={"500"}
-                  textTransform={"uppercase"}
-                  mb={"4"}
-                >
-                  Features
-                </Text>
-
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-                  <List spacing={2}>
-                    <ListItem>Embroidered</ListItem>
-                    <ListItem>Hand wash only</ListItem>{" "}
-                    <ListItem>Pure Cotton</ListItem>
-                  </List>
-                  <List spacing={2}>
-                    <ListItem>Kurta</ListItem>
-                    <ListItem>Round Neck</ListItem>
-                    <ListItem>Casual</ListItem>
-                  </List>
-                </SimpleGrid>
-              </Box>
-              <Box>
-                <Text
-                  fontSize={{ base: "16px", lg: "18px" }}
-                  color={useColorModeValue("yellow.500", "yellow.300")}
-                  fontWeight={"500"}
-                  textTransform={"uppercase"}
-                  mb={"4"}
-                >
-                  Product Details
-                </Text>
-
-                <List spacing={2}>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Net Quantity:
-                    </Text>{" "}
-                    1
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Occasion:
-                    </Text>{" "}
-                    Casual
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Product:
-                    </Text>{" "}
-                    Kurta
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Design:
-                    </Text>{" "}
-                    Embroidered
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Fabric:
-                    </Text>{" "}
-                    Cotton
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Model Wears:
-                    </Text>{" "}
-                    Size S, has Height 5'7",Chest 33",and Waist 28"
-                  </ListItem>
-                  <ListItem>
-                    <Text as={"span"} fontWeight={"bold"}>
-                      Country of Origin:
-                    </Text>{" "}
-                    India
-                  </ListItem>
-                </List>
-              </Box>
             </Stack>
 
             <Button
@@ -280,6 +220,7 @@ const Singlecardwomen = () => {
                 boxShadow: "lg",
               }}
               onClick={handleAdd}
+              isLoading={isLoading}
             >
               Add to cart
             </Button>

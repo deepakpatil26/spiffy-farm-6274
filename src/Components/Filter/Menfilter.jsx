@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   Button,
@@ -14,35 +15,29 @@ import { useSearchParams } from "react-router-dom";
 const Menfilter = ({ type }) => {
   const getCurrentPage = (page) => {
     page = Number(page);
-
-    if (typeof page !== "number" || page <= 0 || !page) {
-      return 1;
-    }
-    return page;
+    return typeof page !== "number" || page <= 0 || !page ? 1 : page;
   };
+
   const initRef = React.useRef();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.getAll("category");
   const [category, setCategory] = useState(initialCategory || []);
   const [page, setPage] = useState(getCurrentPage(searchParams.get("page")));
-  const intialOrder = searchParams.get("order");
-  const [order, setOrder] = useState(intialOrder || "");
+  const initialOrder = searchParams.get("order");
+  const [order, setOrder] = useState(initialOrder || "");
 
   const handleSort = (e) => {
     setOrder(e.target.value);
   };
 
   const handleChange = (e) => {
-    let newCategory = [...category];
     const value = e.target.value;
-    if (newCategory.includes(value)) {
-      newCategory = newCategory.filter((el) => {
-        return el !== value;
-      });
-    } else {
-      newCategory.push(value);
-    }
-    setCategory(newCategory);
+    setCategory(prev => {
+      if (prev.includes(value)) {
+        return prev.filter(el => el !== value);
+      }
+      return [...prev, value];
+    });
   };
 
   useEffect(() => {
@@ -50,33 +45,25 @@ const Menfilter = ({ type }) => {
       page,
       category,
     };
-    console.log(type);
-    order && (params.order = order);
+    if (order) {
+      params.order = order;
+    }
     setSearchParams(params);
   }, [category, page, order]);
 
   return (
     <Flex
-      //   style={{
-      //     display: "flex",
-      //     width: "auto",
-      //     backgroundColor: "	#F0F0F0",
-      //     justifyContent: "center",
-      //     gap: "20px",
-      //     margin: "40px",
-      //     padding: "15px",
-      //   }}'
       width="auto"
       flexDirection={{ base: "column", sm: "column", md: "row", lg: "row" }}
       gap="20px"
       margin="40px"
       padding="15px"
-      backgroundColor="	#F0F0F0"
-      justifyContent={"center"}
+      backgroundColor="#F0F0F0"
+      justifyContent="center"
     >
       <div onChange={handleSort}>
         <Popover
-          trigger={"hover"}
+          trigger="hover"
           closeOnBlur={false}
           placement="bottom-start"
           initialFocusRef={initRef}
@@ -86,14 +73,14 @@ const Menfilter = ({ type }) => {
               <PopoverTrigger>
                 <Button
                   fontSize={{ base: "15px", sm: "20px", md: "20px" }}
-                  style={{ backgroundColor: "white" }}
+                  backgroundColor="white"
                 >
                   Filter By Price
                   <span style={{ marginLeft: "10px" }}>
                     {isOpen ? (
-                      <ChevronDownIcon fontSize={"xl"} />
+                      <ChevronDownIcon fontSize="xl" />
                     ) : (
-                      <ChevronUpIcon fontSize={"xl"} />
+                      <ChevronUpIcon fontSize="xl" />
                     )}
                   </span>
                 </Button>
@@ -103,7 +90,7 @@ const Menfilter = ({ type }) => {
                   <PopoverBody>
                     <input
                       style={{ marginRight: "10px" }}
-                      value={"asc"}
+                      value="asc"
                       type="radio"
                       name="order"
                       defaultChecked={order === "asc"}
@@ -113,7 +100,7 @@ const Menfilter = ({ type }) => {
                     <br />
                     <input
                       style={{ marginRight: "10px" }}
-                      value={"desc"}
+                      value="desc"
                       name="order"
                       type="radio"
                       defaultChecked={order === "desc"}
@@ -129,7 +116,7 @@ const Menfilter = ({ type }) => {
 
       <div>
         <Popover
-          trigger={"hover"}
+          trigger="hover"
           closeOnBlur={false}
           placement="bottom-start"
           initialFocusRef={initRef}
@@ -139,14 +126,14 @@ const Menfilter = ({ type }) => {
               <PopoverTrigger>
                 <Button
                   fontSize={{ base: "15px", sm: "20px", md: "20px" }}
-                  style={{ backgroundColor: "white" }}
+                  backgroundColor="white"
                 >
                   Filter By Category{" "}
                   <span style={{ marginLeft: "10px" }}>
                     {isOpen ? (
-                      <ChevronDownIcon fontSize={"xl"} />
+                      <ChevronDownIcon fontSize="xl" />
                     ) : (
-                      <ChevronUpIcon fontSize={"xl"} />
+                      <ChevronUpIcon fontSize="xl" />
                     )}
                   </span>
                 </Button>

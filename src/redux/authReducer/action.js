@@ -9,37 +9,32 @@ import {
 } from "./actionTypes";
 import axios from "axios";
 
-export const SignUpFunc = (payload) => (dispatch) => {
+const API_BASE_URL = "https://lifestyle-mock-server-api.onrender.com";
+
+export const SignUpFunc = (payload) => async (dispatch) => {
   dispatch({ type: SIGNUP_REQUEST });
-  axios
-    .post(
-      "https://lifestyle-mock-server-api.onrender.com/registeredUser",
-      payload
-    )
-    .then((response) => {
-      dispatch({ type: SIGNUP_SUCCESS });
-    })
-    .catch((e) => {
-      dispatch({ type: SIGNUP_FAILURE });
-    });
+  try {
+    await axios.post(`${API_BASE_URL}/registeredUser`, payload);
+    dispatch({ type: SIGNUP_SUCCESS });
+  } catch (error) {
+    dispatch({ type: SIGNUP_FAILURE, payload: error.message });
+  }
 };
 
-export const getdata = (dispatch) => {
-  axios
-    .get("https://lifestyle-mock-server-api.onrender.com/registeredUser")
-    .then((res) => {
-      dispatch({ type: SIGNIN_REQUEST, payload: res.data });
-    })
-    .catch(() => {
-      dispatch({ type: SIGNIN_FAILURE });
-    });
+export const getdata = () => async (dispatch) => {
+  dispatch({ type: SIGNIN_REQUEST });
+  try {
+    const response = await axios.get(`${API_BASE_URL}/registeredUser`);
+    dispatch({ type: SIGNIN_REQUEST, payload: response.data });
+  } catch (error) {
+    dispatch({ type: SIGNIN_FAILURE, payload: error.message });
+  }
 };
 
-export const loginFunction = (payload) => (dispatch) => {
-  dispatch({ type: SIGNIN_SUCCESS, payload: payload });
-  console.log(payload);
+export const loginFunction = (userData) => (dispatch) => {
+  dispatch({ type: SIGNIN_SUCCESS, payload: userData });
 };
 
-export const logout = (dispatch) => {
+export const logout = () => (dispatch) => {
   dispatch({ type: SIGNOUT });
 };
