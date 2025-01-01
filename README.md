@@ -5,35 +5,42 @@
 ![Project Logo](https://github.com/deepakpatil26/spiffy-farm-6274/blob/main/src/Asssets/logo2.png)
 
 ### 💡 Project Vision
+
 Introducing a meticulously crafted clone of Lifestyle Stores - India's premier fashion marketplace, bringing the ultimate shopping experience to your fingertips!
 
-🔗 **Live Demo**: [Outfit Store](https://outfitstore.vercel.app/)
+🔗 **Live Demo**: [Outfit Store](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
 
 ---
 
 ## 🚀 Project Highlights
 
 ### ✨ Key Features
-- 🔐 **Secure Authentication**: 
+
+- 🔐 **Secure Authentication**:
+
   - Robust Login/Signup with comprehensive validation
   - Protecting user data with cutting-edge security measures
 
 - 📦 **Seamless Product Experience**:
+
   - Detailed product descriptions
   - High-resolution product imagery
   - Intuitive navigation across categories
 
 - 🛒 **Advanced Cart Functionality**:
+
   - Flexible quantity management
   - Easy add/remove product capabilities
   - Real-time cart updates
 
 - 💳 **Smooth Checkout Process**:
+
   - Streamlined payment page
   - Order confirmation system
   - Secure transaction handling
 
 - 👑 **Admin Capabilities**:
+
   - Product addition and modification
   - Inventory management tools
 
@@ -42,6 +49,7 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
   - Seamless experience on mobile, tablet, and desktop
 
 ### 🛠 Tech Arsenal
+
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Redux](https://img.shields.io/badge/Redux-593D88?style=for-the-badge&logo=redux&logoColor=white)
 ![Chakra UI](https://img.shields.io/badge/Chakra--UI-319795?style=for-the-badge&logo=chakra-ui&logoColor=white)
@@ -55,25 +63,33 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 <summary>🖱️ Click to Explore Project Screenshots</summary>
 
 ### 🏠 Homepage
+
 ![Homepage](https://user-images.githubusercontent.com/94694221/230531061-518219f4-c2f9-4dd7-910e-8313201a7d68.png)
 
 ### 👚 Product Categories
+
 ![Product Categories](https://user-images.githubusercontent.com/94694221/230531033-12cfa086-a87c-4bdf-ac33-50ba18765cac.png)
 
 ### 🔍 Product Details
+
 ![Product Details](https://user-images.githubusercontent.com/91380941/229769911-813db0f5-375a-4242-a311-384c917c3c7b.png)
 
 ### 🛒 Shopping Cart
+
 ![Shopping Cart](https://user-images.githubusercontent.com/94694221/230530957-acd9dc18-5658-4f8f-a18a-6dbf6ee5cd0c.png)
 
 ### 💳 Checkout Process
+
 ![Checkout](https://user-images.githubusercontent.com/94694221/230530999-b5719a21-dcf7-4ad2-a365-3f5363bb4738.png)
 
 ### 👤 User Authentication
+
 ![User Authentication](https://user-images.githubusercontent.com/94694221/230531016-5468e0e9-c368-4fd2-ae6d-52b54bb25c28.png)
 
 ### 🏷️ Final Order Confirmation
+
 ![Order Confirmation](https://user-images.githubusercontent.com/94694221/230531109-4f55952e-e0b8-4254-ad7e-933937152057.png)
+
 </details>
 
 ---
@@ -81,11 +97,13 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 ## 🔧 Technical Architecture
 
 ### Frontend Brilliance
+
 - **React**: Powering dynamic, interactive user interfaces
 - **Redux**: State management for complex application logic
 - **Chakra UI**: Elegant, responsive design system
 
 ### Backend Foundations
+
 - **Node.js**: Robust server-side runtime
 - **JSON Server**: Lightweight data management
 
@@ -94,6 +112,7 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 ## 🤝 Contributing Guidelines
 
 ### How to Contribute
+
 1. 🍴 **Fork the Repository**
 2. 🌿 **Create Feature Branch**
    ```bash
@@ -112,6 +131,7 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 ---
 
 ## 💡 Project Inspiration
+
 Inspired by Lifestyle Stores, a Landmark Group company, this project aims to replicate the seamless online shopping experience of India's leading fashion destination.
 
 ---
@@ -125,6 +145,7 @@ More than just a clone, this project represents a journey of learning, innovatio
 ---
 
 ## 📜 License
+
 [Insert Appropriate License Here]
 
 **Crafted with ❤️ by Passionate Developers**
