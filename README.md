@@ -2,13 +2,14 @@
 
 ## 🌟 Project Showcase: Reimagining Online Fashion Shopping
 
-![Project Logo](https://github.com/deepakpatil26/spiffy-farm-6274/blob/main/src/Asssets/logo2.png)
+![Project Logo](public/logo.png)
 
 ### 💡 Project Vision
 
 Introducing a meticulously crafted clone of Lifestyle Stores - India's premier fashion marketplace, bringing the ultimate shopping experience to your fingertips!
 
-🔗 **Live Demo**: [Outfit Store](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
+🌐 **Live Demo**: [Outfit Store](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Launch_Demo-FF6B6B?style=for-the-badge&logo=vercel&logoColor=white)](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
 
 ---
 
@@ -143,9 +144,5 @@ More than just a clone, this project represents a journey of learning, innovatio
 **Happy Shopping! 👗🛒**
 
 ---
-
-## 📜 License
-
-[Insert Appropriate License Here]
 
 **Crafted with ❤️ by Passionate Developers**
