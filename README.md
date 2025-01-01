@@ -8,7 +8,7 @@
 
 Introducing a meticulously crafted clone of Lifestyle Stores - India's premier fashion marketplace, bringing the ultimate shopping experience to your fingertips!
 
-🌐 **Live Demo**: [Outfit Store](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
+🌐 **Live Demo**:
 [![Live Demo](https://img.shields.io/badge/Launch_Demo-FF6B6B?style=for-the-badge&logo=vercel&logoColor=white)](https://spiffy-farm-6274-5t7yai1er-deepakpatil26s-projects.vercel.app/)
 
 ---
