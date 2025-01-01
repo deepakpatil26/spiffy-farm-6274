@@ -33,18 +33,21 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const toast = useToast();
   let { isAuth, afterLoginUser } = useSelector((state) => state.AuthReducer);
-  const { cartItems } = useSelector((store) => store.cartReducer);
+  const { cartItems = [] } = useSelector((store) => store.cartReducer);
 
   useEffect(() => {
-    axios
-      .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
-      .then((res) => {
-        dispatch(addToCart(res.data));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [cartItems]);
+    // Only fetch cart items if we're authenticated
+    if (isAuth) {
+      axios
+        .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
+        .then((res) => {
+          dispatch(addToCart(res.data));
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [dispatch, isAuth]); // Remove cartItems from dependencies
 
   return (
     <Box
