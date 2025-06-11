@@ -1,0 +1,133 @@
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { BsBag, BsPerson } from "react-icons/bs";
+import { AiOutlineHeart } from "react-icons/ai";
+import Logo from "../../Asssets/logo2.png";
+import HomeMenu from "./HomeMenu";
+import SearchBar from "./SearchBar";
+import SideBar from "./Sidebar";
+import { RootState } from "../../types";
+import { logout } from "../../redux/authReducer/action";
+import { addToCart } from "../../redux/cartReducer/action";
+import axios from "axios";
+
+const Navbar: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  const { isAuth, afterLoginUser } = useSelector((state: RootState) => state.AuthReducer);
+  const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);
+
+  useEffect(() => {
+    if (isAuth) {
+      axios
+        .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
+        .then((res) => {
+          dispatch(addToCart(res.data));
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [dispatch, isAuth]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+
+  return (
+    <div className="sticky top-0 z-50 bg-gray-50 shadow-sm">
+      <div className="flex items-center justify-between px-4 md:px-12 py-3 max-w-7xl mx-auto">
+        {/* Mobile Menu */}
+        <div className="lg:hidden">
+          <SideBar />
+        </div>
+
+        {/* Logo */}
+        <Link to="/" className="flex-shrink-0">
+          <img
+            src={Logo}
+            alt="logo"
+            className="h-8 md:h-12 w-auto"
+          />
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:block flex-1 max-w-md mx-8">
+          <HomeMenu />
+        </div>
+
+        {/* Search Bar */}
+        <div className="hidden lg:block flex-1 max-w-md mx-8">
+          <SearchBar />
+        </div>
+
+        {/* User Actions */}
+        <div className="flex items-center space-x-4">
+          {/* User Menu */}
+          <div className="relative group">
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <BsPerson className="w-5 h-5" />
+            </button>
+            
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="py-1">
+                <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                  Hey, {isAuth ? afterLoginUser.name : "User"}
+                </div>
+                <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  My Account
+                </Link>
+                <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Order History
+                </Link>
+                <Link to="/adminLogin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Admin
+                </Link>
+                {isAuth ? (
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign Up
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Wishlist */}
+          <Link to="#" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <AiOutlineHeart className="w-5 h-5" />
+          </Link>
+
+          {/* Cart */}
+          <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <BsBag className="w-5 h-5" />
+            {cartItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-secondary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile Search */}
+      <div className="lg:hidden px-4 pb-3">
+        <SearchBar />
+      </div>
+    </div>
+  );
+};
+
+export default Navbar;
