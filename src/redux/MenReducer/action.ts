@@ -21,7 +21,7 @@ export const getmens = (paramObj: QueryParams) => async (dispatch: Dispatch) => 
     );
     const obj: ApiResponse<Product[]> = {
       data: response.data,
-      total: response.headers.get("X-Total-Count"),
+      total: Number(response.headers['x-total-count']),
     };
     dispatch({ type: MEN_REQUEST_SUCCESS, payload: obj });
   } catch (error) {
@@ -38,7 +38,7 @@ export const getwomens = (paramObj: QueryParams) => async (dispatch: Dispatch) =
     );
     const obj: ApiResponse<Product[]> = {
       data: response.data,
-      total: response.headers.get("X-Total-Count"),
+      total: Number(response.headers['x-total-count']),
     };
     dispatch({ type: WOMEN_REQUEST_SUCCESS, payload: obj });
   } catch (error) {
