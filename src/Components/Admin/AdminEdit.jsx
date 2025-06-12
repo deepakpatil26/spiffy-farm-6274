@@ -70,7 +70,7 @@ const AdminEdit = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [id]);
 
   return (
     <FormControl

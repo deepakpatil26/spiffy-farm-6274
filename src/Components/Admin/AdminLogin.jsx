@@ -43,7 +43,7 @@ export default function AdminLogin() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(`https://reqres.in/api/login`, {
+      await axios.post(`https://reqres.in/api/login`, {
         email,
         password,
       });

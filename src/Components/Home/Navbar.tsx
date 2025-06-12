@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { BsBag, BsPerson } from "react-icons/bs";
 import { AiOutlineHeart } from "react-icons/ai";
 import Logo from "../../Asssets/logo2.png";
@@ -10,11 +10,12 @@ import SideBar from "./Sidebar";
 import { RootState } from "../../types";
 import { logout } from "../../redux/authReducer/action";
 import { addToCart } from "../../redux/cartReducer/action";
+import { useAppDispatch } from "../../redux/hooks";
 import axios from "axios";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   
   const { isAuth, afterLoginUser } = useSelector((state: RootState) => state.AuthReducer);
   const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);

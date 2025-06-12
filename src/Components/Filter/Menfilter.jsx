@@ -22,7 +22,7 @@ const Menfilter = ({ type }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.getAll("category");
   const [category, setCategory] = useState(initialCategory || []);
-  const [page, setPage] = useState(getCurrentPage(searchParams.get("page")));
+  const [page] = useState(getCurrentPage(searchParams.get("page")));
   const initialOrder = searchParams.get("order");
   const [order, setOrder] = useState(initialOrder || "");
 

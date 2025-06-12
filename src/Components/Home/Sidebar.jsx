@@ -23,7 +23,7 @@ import { logout } from "../../redux/authReducer/action";
 
 function SideBar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  let { isAuth, afterLoginUser } = useSelector((state) => state.AuthReducer);
+  let { isAuth } = useSelector((state) => state.AuthReducer);
   const toast = useToast();
   const dispatch = useDispatch();
 

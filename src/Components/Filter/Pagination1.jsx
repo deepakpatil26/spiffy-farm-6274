@@ -29,7 +29,7 @@ const Pagination1 = () => {
     };
     // page && (params.page = page);
     setSearchParams(params);
-  }, [page]);
+  }, [page, setSearchParams]);
 
   return (
     <Box width={"80%"} margin="auto">
