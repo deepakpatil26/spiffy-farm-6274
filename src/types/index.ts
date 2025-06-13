@@ -69,7 +69,7 @@ export interface ProductState {
   menError: boolean;
   womenLoading: boolean;
   womenError: boolean;
-  total: string;
+  total: number;
   men: Product[];
   women: Product[];
   isLoading: boolean;

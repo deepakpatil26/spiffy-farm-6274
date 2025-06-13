@@ -13,7 +13,7 @@ const initialState: ProductState = {
   menError: false,
   womenLoading: false,
   womenError: false,
-  total: "",
+  total: 0,
   men: [],
   women: [],
   isLoading: false,
@@ -50,7 +50,7 @@ export const reducer = (state = initialState, { type, payload }: ProductAction):
         menError: false,
         isLoading: false,
         isError: false,
-        total: payload?.total || "",
+        total: payload?.total || 0,
         men: payload?.data || [],
       };
     case WOMEN_REQUEST_PENDING:
@@ -76,7 +76,7 @@ export const reducer = (state = initialState, { type, payload }: ProductAction):
         womenError: false,
         isLoading: false,
         isError: false,
-        total: payload?.total || "",
+        total: payload?.total || 0,
         women: payload?.data || [],
       };
     default:
