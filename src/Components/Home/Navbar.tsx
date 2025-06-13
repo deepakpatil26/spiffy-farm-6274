@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BsBag, BsPerson } from "react-icons/bs";
-import { AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineMenu } from "react-icons/ai";
 import Logo from "../../Asssets/logo2.png";
 import HomeMenu from "./HomeMenu";
 import SearchBar from "./SearchBar";
@@ -12,10 +12,13 @@ import { logout } from "../../redux/authReducer/action";
 import { addToCart } from "../../redux/cartReducer/action";
 import { useAppDispatch } from "../../redux/hooks";
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   
   const { isAuth, afterLoginUser } = useSelector((state: RootState) => state.AuthReducer);
   const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);
@@ -35,16 +38,22 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    setShowUserMenu(false);
+    toast.success('Logged out successfully');
     navigate('/');
   };
 
   return (
     <div className="sticky top-0 z-50 bg-gray-50 shadow-sm">
+      {/* Main Navbar */}
       <div className="flex items-center justify-between px-4 md:px-12 py-3 max-w-7xl mx-auto">
-        {/* Mobile Menu */}
-        <div className="lg:hidden">
-          <SideBar />
-        </div>
+        {/* Mobile Menu Button */}
+        <button 
+          className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+          onClick={() => setShowMobileMenu(true)}
+        >
+          <AiOutlineMenu className="w-6 h-6" />
+        </button>
 
         {/* Logo */}
         <Link to="/" className="flex-shrink-0">
@@ -68,42 +77,60 @@ const Navbar: React.FC = () => {
         {/* User Actions */}
         <div className="flex items-center space-x-4">
           {/* User Menu */}
-          <div className="relative group">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <div className="relative">
+            <button 
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+            >
               <BsPerson className="w-5 h-5" />
             </button>
             
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              <div className="py-1">
-                <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                  Hey, {isAuth ? afterLoginUser.name : "User"}
-                </div>
-                <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  My Account
-                </Link>
-                <Link to="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  Order History
-                </Link>
-                <Link to="/adminLogin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  Admin
-                </Link>
-                {isAuth ? (
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Sign Out
-                  </button>
-                ) : (
-                  <Link
-                    to="/signup"
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
+                <div className="py-1">
+                  <div className="px-4 py-2 text-sm text-gray-700 border-b">
+                    Hey, {isAuth ? afterLoginUser.name : "User"}
+                  </div>
+                  <Link 
+                    to="#" 
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
                   >
-                    Sign Up
+                    My Account
                   </Link>
-                )}
+                  <Link 
+                    to="#" 
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Order History
+                  </Link>
+                  <Link 
+                    to="/adminLogin" 
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Admin
+                  </Link>
+                  {isAuth ? (
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign Out
+                    </button>
+                  ) : (
+                    <Link
+                      to="/signup"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Wishlist */}
@@ -127,6 +154,14 @@ const Navbar: React.FC = () => {
       <div className="lg:hidden px-4 pb-3">
         <SearchBar />
       </div>
+
+      {/* Mobile Sidebar */}
+      {showMobileMenu && (
+        <SideBar 
+          isOpen={showMobileMenu} 
+          onClose={() => setShowMobileMenu(false)} 
+        />
+      )}
     </div>
   );
 };

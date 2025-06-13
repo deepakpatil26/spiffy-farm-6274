@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { CardProps } from '../types';
 
 const Card: React.FC<CardProps> = ({ 
@@ -31,9 +32,10 @@ const Card: React.FC<CardProps> = ({
     setIsLoading(true);
     try {
       await axios.post(`https://lifestyle-mock-server-api.onrender.com/cart`, cartItem);
-      // You can add toast notification here
+      toast.success('Added to cart successfully!');
     } catch (error) {
       console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart');
     } finally {
       setIsLoading(false);
     }
