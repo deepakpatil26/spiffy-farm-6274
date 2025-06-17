@@ -1,5 +1,4 @@
 import { Dispatch } from 'redux';
-import axios from "axios";
 import {
   MEN_REQUEST_FAILURE,
   MEN_REQUEST_PENDING,
@@ -8,40 +7,55 @@ import {
   WOMEN_REQUEST_PENDING,
   WOMEN_REQUEST_SUCCESS,
 } from "./actionType";
+import { productService, ProductFilters } from "../../services/productService";
 import { QueryParams, Product, ApiResponse } from "../../types";
 
-const API_BASE_URL = "https://lifestyle-mock-server-api.onrender.com";
-
-export const getmens = (paramObj: QueryParams) => async (dispatch: Dispatch) => {
+export const getmens = (queryParams: QueryParams) => async (dispatch: Dispatch) => {
   dispatch({ type: MEN_REQUEST_PENDING });
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/men?_limit=12`,
-      paramObj
-    );
-    const obj: ApiResponse<Product[]> = {
-      data: response.data,
-      total: Number(response.headers['x-total-count']),
+    const filters: ProductFilters = {
+      category: queryParams.params.category,
+      page: queryParams.params._page ? parseInt(queryParams.params._page) : 1,
+      limit: 12,
+      sortBy: queryParams.params._sort ? 'price' : undefined,
+      sortOrder: queryParams.params._order as 'asc' | 'desc' | undefined,
     };
+
+    const result = await productService.getMenProducts(filters);
+    
+    const obj: ApiResponse<Product[]> = {
+      data: result.data,
+      total: result.total,
+    };
+    
     dispatch({ type: MEN_REQUEST_SUCCESS, payload: obj });
   } catch (error) {
+    console.error('Error fetching men products:', error);
     dispatch({ type: MEN_REQUEST_FAILURE });
   }
 };
 
-export const getwomens = (paramObj: QueryParams) => async (dispatch: Dispatch) => {
+export const getwomens = (queryParams: QueryParams) => async (dispatch: Dispatch) => {
   dispatch({ type: WOMEN_REQUEST_PENDING });
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/women?_limit=12`,
-      paramObj
-    );
-    const obj: ApiResponse<Product[]> = {
-      data: response.data,
-      total: Number(response.headers['x-total-count']),
+    const filters: ProductFilters = {
+      category: queryParams.params.category,
+      page: queryParams.params._page ? parseInt(queryParams.params._page) : 1,
+      limit: 12,
+      sortBy: queryParams.params._sort ? 'price' : undefined,
+      sortOrder: queryParams.params._order as 'asc' | 'desc' | undefined,
     };
+
+    const result = await productService.getWomenProducts(filters);
+    
+    const obj: ApiResponse<Product[]> = {
+      data: result.data,
+      total: result.total,
+    };
+    
     dispatch({ type: WOMEN_REQUEST_SUCCESS, payload: obj });
   } catch (error) {
+    console.error('Error fetching women products:', error);
     dispatch({ type: WOMEN_REQUEST_FAILURE });
   }
 };

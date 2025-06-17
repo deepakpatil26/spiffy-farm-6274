@@ -20,6 +20,8 @@ const initialState: AuthState = {
   isError: false,
   afterLoginUser: {} as AuthUser,
   isAdmin: false,
+  user: null,
+  session: null,
 };
 
 interface AuthAction {
@@ -35,6 +37,7 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
       return {
         ...state,
         createAccountLoading: true,
+        createError: false,
       };
 
     case SIGNUP_SUCCESS:
@@ -57,7 +60,7 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
       return {
         ...state,
         isLoading: true,
-        userData: payload || state.userData,
+        isError: false,
       };
 
     case SIGNIN_SUCCESS:
@@ -65,7 +68,13 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         ...state,
         isLoading: false,
         isAuth: true,
-        afterLoginUser: payload,
+        user: payload.user,
+        session: payload.session,
+        afterLoginUser: {
+          email: payload.user?.email || '',
+          name: payload.user?.user_metadata?.first_name || '',
+          password: '',
+        },
         isError: false,
       };
 
@@ -74,6 +83,9 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         ...state,
         isLoading: false,
         isError: true,
+        isAuth: false,
+        user: null,
+        session: null,
       };
       
     case SIGNOUT:
@@ -86,11 +98,15 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         createAccountLoading: false,
         createError: false,
         afterLoginUser: {} as AuthUser,
+        user: null,
+        session: null,
       };
       
     case GET_USER:
       return {
         ...state,
+        user: payload,
+        isAuth: !!payload,
       };
       
     default:

@@ -1,5 +1,4 @@
 import { Dispatch } from 'redux';
-import axios from 'axios';
 import {
   SIGNUP_FAILURE,
   SIGNUP_REQUEST,
@@ -8,35 +7,75 @@ import {
   SIGNIN_REQUEST,
   SIGNIN_SUCCESS,
   SIGNOUT,
+  GET_USER,
 } from './actionTypes';
-import { User, AuthUser } from '../../types';
+import { authService, SignUpData, SignInData } from '../../services/authService';
 
-const API_BASE_URL = "https://lifestyle-mock-server-api.onrender.com";
-
-export const SignUpFunc = (payload: User) => async (dispatch: Dispatch) => {
+export const signUp = (userData: SignUpData) => async (dispatch: Dispatch) => {
   dispatch({ type: SIGNUP_REQUEST });
   try {
-    await axios.post(`${API_BASE_URL}/registeredUser`, payload);
-    dispatch({ type: SIGNUP_SUCCESS });
+    const data = await authService.signUp(userData);
+    dispatch({ type: SIGNUP_SUCCESS, payload: data });
+    return data;
   } catch (error: any) {
     dispatch({ type: SIGNUP_FAILURE, payload: error.message });
+    throw error;
   }
 };
 
-export const getdata = () => async (dispatch: Dispatch) => {
+export const signIn = (credentials: SignInData) => async (dispatch: Dispatch) => {
   dispatch({ type: SIGNIN_REQUEST });
   try {
-    const response = await axios.get(`${API_BASE_URL}/registeredUser`);
-    dispatch({ type: SIGNIN_REQUEST, payload: response.data });
+    const data = await authService.signIn(credentials);
+    dispatch({ type: SIGNIN_SUCCESS, payload: data });
+    return data;
   } catch (error: any) {
     dispatch({ type: SIGNIN_FAILURE, payload: error.message });
+    throw error;
   }
 };
 
-export const loginFunction = (userData: AuthUser) => (dispatch: Dispatch) => {
-  dispatch({ type: SIGNIN_SUCCESS, payload: userData });
+export const signOut = () => async (dispatch: Dispatch) => {
+  try {
+    await authService.signOut();
+    dispatch({ type: SIGNOUT });
+  } catch (error: any) {
+    console.error('Sign out error:', error);
+  }
 };
 
-export const logout = () => (dispatch: Dispatch) => {
-  dispatch({ type: SIGNOUT });
+export const getCurrentUser = () => async (dispatch: Dispatch) => {
+  try {
+    const user = await authService.getCurrentUser();
+    dispatch({ type: GET_USER, payload: user });
+    return user;
+  } catch (error: any) {
+    console.error('Get user error:', error);
+    return null;
+  }
+};
+
+export const getSession = () => async (dispatch: Dispatch) => {
+  try {
+    const session = await authService.getSession();
+    if (session?.user) {
+      dispatch({ type: SIGNIN_SUCCESS, payload: { user: session.user, session } });
+    }
+    return session;
+  } catch (error: any) {
+    console.error('Get session error:', error);
+    return null;
+  }
+};
+
+// Legacy actions for backward compatibility
+export const SignUpFunc = signUp;
+export const loginFunction = (userData: any) => (dispatch: Dispatch) => {
+  dispatch({ type: SIGNIN_SUCCESS, payload: { user: userData } });
+};
+export const logout = signOut;
+export const getdata = () => async (dispatch: Dispatch) => {
+  // This was used to get registered users from JSON server
+  // Now we'll use Supabase auth instead
+  return [];
 };

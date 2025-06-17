@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { shallowEqual, useDispatch, useSelector } from "react-redux";
-import { SignUpFunc } from "../redux/authReducer/action";
+import { useDispatch, useSelector } from "react-redux";
+import { signUp } from "../redux/authReducer/action";
 import { RootState } from "../types";
 import { toast } from 'react-toastify';
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import Logo from "../Asssets/logo2.png";
-import axios from "axios";
 
 const Signup: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -14,22 +13,16 @@ const Signup: React.FC = () => {
   const [lastName, setLastName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [userObj, setUserObj] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  const { successCreate, createError } = useSelector((state: RootState) => {
-    return {
-      successCreate: state.AuthReducer.successCreate,
-      createError: state.AuthReducer.createError,
-    };
-  }, shallowEqual);
+  const { successCreate, createError } = useSelector((state: RootState) => state.AuthReducer);
 
   useEffect(() => {
     if (successCreate) {
-      toast.success('Account created successfully!');
+      toast.success('Account created successfully! Please check your email to verify your account.');
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -42,7 +35,9 @@ const Signup: React.FC = () => {
     }
   }, [createError]);
 
-  const SignupRequest = async () => {
+  const SignupRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!email || !firstName || !lastName || !password) {
       toast.error("Please fill all fields");
       return;
@@ -55,45 +50,24 @@ const Signup: React.FC = () => {
 
     setIsLoading(true);
 
-    let checkAlready = false;
-    userObj.length > 0 &&
-      userObj.forEach((el) => {
-        if (el.email === email) {
-          checkAlready = true;
-        }
-      });
-
-    if (!checkAlready) {
-      dispatch(
-        SignUpFunc({
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          password: password,
-        }) as any
-      );
+    try {
+      await dispatch(signUp({
+        firstName,
+        lastName,
+        email,
+        password,
+      }) as any);
 
       setEmail("");
       setPassword("");
       setFirstName("");
       setLastName("");
-    } else {
-      toast.error("User already exists with this email!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create account");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
-
-  useEffect(() => {
-    axios
-      .get("https://lifestyle-mock-server-api.onrender.com/registeredUser")
-      .then((response) => {
-        setUserObj(response.data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
@@ -120,7 +94,7 @@ const Signup: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-8">
-            <div className="space-y-6">
+            <form onSubmit={SignupRequest} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
@@ -205,7 +179,7 @@ const Signup: React.FC = () => {
 
               <div>
                 <button
-                  onClick={SignupRequest}
+                  type="submit"
                   disabled={isLoading}
                   className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
@@ -221,7 +195,7 @@ const Signup: React.FC = () => {
                   </Link>
                 </p>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

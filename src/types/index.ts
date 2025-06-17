@@ -13,11 +13,13 @@ export interface Product {
   gender: 'men' | 'women';
   type: string;
   discount?: number;
+  created_at?: string;
 }
 
 // Cart Types
 export interface CartItem extends Product {
   quantity: number;
+  cart_item_id?: string; // For Supabase cart items
 }
 
 // User Types
@@ -26,7 +28,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
+  created_at?: string;
 }
 
 export interface AuthUser {
@@ -62,6 +65,8 @@ export interface AuthState {
   isError: boolean;
   afterLoginUser: AuthUser;
   isAdmin?: boolean;
+  user: any; // Supabase user object
+  session: any; // Supabase session object
 }
 
 export interface ProductState {

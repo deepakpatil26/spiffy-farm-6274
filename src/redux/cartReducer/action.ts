@@ -8,8 +8,10 @@ import {
   CART_REQUEST_SUCCESS,
   CART_REQUEST_FAILURE,
   CLEAR_CART,
+  LOAD_CART,
 } from "./actionTypes";
 import { CartItem } from '../../types';
+import { cartService } from '../../services/cartService';
 
 // Action to start cart operation
 const cartRequestPending = () => ({
@@ -27,23 +29,55 @@ const cartRequestFailure = (error: string) => ({
   payload: error,
 });
 
-// Add item to cart
-export const addToCart = (item: CartItem | CartItem[]) => (dispatch: Dispatch) => {
+// Load cart from Supabase
+export const loadCart = (userId: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
+    const cartItems = await cartService.getCartItems(userId);
     dispatch({
-      type: ADD_TO_CART,
-      payload: item,
+      type: LOAD_CART,
+      payload: cartItems,
     });
-    
-    // Save to localStorage
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    dispatch(cartRequestSuccess());
+  } catch (error: any) {
+    dispatch(cartRequestFailure(error.message));
+  }
+};
+
+// Add item to cart
+export const addToCart = (item: CartItem | CartItem[], userId?: string) => async (dispatch: Dispatch) => {
+  dispatch(cartRequestPending());
+  try {
     if (Array.isArray(item)) {
-      localStorage.setItem("cart", JSON.stringify(item));
+      // Loading existing cart items
+      dispatch({
+        type: ADD_TO_CART,
+        payload: item,
+      });
     } else {
-      cart.push(item);
+      // Adding new item
+      if (userId) {
+        await cartService.addToCart(userId, item.id, item.quantity);
+      }
+      
+      dispatch({
+        type: ADD_TO_CART,
+        payload: item,
+      });
+      
+      // Save to localStorage as backup
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existingItemIndex = cart.findIndex((cartItem: CartItem) => cartItem.id === item.id);
+      
+      if (existingItemIndex >= 0) {
+        cart[existingItemIndex].quantity += item.quantity;
+      } else {
+        cart.push(item);
+      }
+      
       localStorage.setItem("cart", JSON.stringify(cart));
     }
+    
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
@@ -51,9 +85,15 @@ export const addToCart = (item: CartItem | CartItem[]) => (dispatch: Dispatch) =
 };
 
 // Remove item from cart
-export const removeFromCart = (id: string) => (dispatch: Dispatch) => {
+export const removeFromCart = (id: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
+    if (userId) {
+      // Find cart item ID and remove from Supabase
+      // This would need the cart item ID, not product ID
+      // For now, we'll handle this in the component
+    }
+    
     dispatch({
       type: REMOVE_FROM_CART,
       payload: id,
@@ -63,6 +103,7 @@ export const removeFromCart = (id: string) => (dispatch: Dispatch) => {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const updatedCart = cart.filter((item: CartItem) => item.id !== id);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
@@ -70,7 +111,7 @@ export const removeFromCart = (id: string) => (dispatch: Dispatch) => {
 };
 
 // Increment item quantity
-export const incrementQuantity = (id: string) => (dispatch: Dispatch) => {
+export const incrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
     dispatch({
@@ -84,6 +125,7 @@ export const incrementQuantity = (id: string) => (dispatch: Dispatch) => {
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     );
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
@@ -91,7 +133,7 @@ export const incrementQuantity = (id: string) => (dispatch: Dispatch) => {
 };
 
 // Decrement item quantity
-export const decrementQuantity = (id: string) => (dispatch: Dispatch) => {
+export const decrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
     dispatch({
@@ -107,6 +149,7 @@ export const decrementQuantity = (id: string) => (dispatch: Dispatch) => {
         : item
     );
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+    
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
@@ -114,9 +157,13 @@ export const decrementQuantity = (id: string) => (dispatch: Dispatch) => {
 };
 
 // Clear cart
-export const clearCart = () => (dispatch: Dispatch) => {
+export const clearCart = (userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
+    if (userId) {
+      await cartService.clearCart(userId);
+    }
+    
     dispatch({ type: CLEAR_CART });
     localStorage.removeItem("cart");
     dispatch(cartRequestSuccess());
