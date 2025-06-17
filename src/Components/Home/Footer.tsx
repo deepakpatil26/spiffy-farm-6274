@@ -66,68 +66,68 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="font-bold text-black mb-4">Women</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-500">Tops</a></li>
-              <li><a href="#" className="hover:text-primary-500">Ethnicwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Bottoms</a></li>
-              <li><a href="#" className="hover:text-primary-500">Dresses</a></li>
-              <li><a href="#" className="hover:text-primary-500">Jumpsuits</a></li>
-              <li><a href="#" className="hover:text-primary-500">Winterwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Lingerie</a></li>
-              <li><a href="#" className="hover:text-primary-500">Sportswear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Beauty</a></li>
-              <li><a href="#" className="hover:text-primary-500">Watches</a></li>
-              <li><a href="#" className="hover:text-primary-500">Sunglasses</a></li>
+              <li><a href="/women/tops" className="hover:text-primary-500">Tops</a></li>
+              <li><a href="/women/ethnicwear" className="hover:text-primary-500">Ethnicwear</a></li>
+              <li><a href="/women/bottoms" className="hover:text-primary-500">Bottoms</a></li>
+              <li><a href="/women/dresses" className="hover:text-primary-500">Dresses</a></li>
+              <li><a href="/women/jumpsuits" className="hover:text-primary-500">Jumpsuits</a></li>
+              <li><a href="/women/winterwear" className="hover:text-primary-500">Winterwear</a></li>
+              <li><a href="/women/lingerie" className="hover:text-primary-500">Lingerie</a></li>
+              <li><a href="/women/sportswear" className="hover:text-primary-500">Sportswear</a></li>
+              <li><a href="/women/beauty" className="hover:text-primary-500">Beauty</a></li>
+              <li><a href="/women/watches" className="hover:text-primary-500">Watches</a></li>
+              <li><a href="/women/sunglasses" className="hover:text-primary-500">Sunglasses</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-black mb-4">Men</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-500">Tops</a></li>
-              <li><a href="#" className="hover:text-primary-500">Bottoms</a></li>
-              <li><a href="#" className="hover:text-primary-500">Ethnicwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Winterwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Sportswear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Innerwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Grooming</a></li>
-              <li><a href="#" className="hover:text-primary-500">Watches</a></li>
-              <li><a href="#" className="hover:text-primary-500">Sunglasses</a></li>
+              <li><a href="/men/tops" className="hover:text-primary-500">Tops</a></li>
+              <li><a href="/men/bottoms" className="hover:text-primary-500">Bottoms</a></li>
+              <li><a href="/men/ethnicwear" className="hover:text-primary-500">Ethnicwear</a></li>
+              <li><a href="/men/winterwear" className="hover:text-primary-500">Winterwear</a></li>
+              <li><a href="/men/sportswear" className="hover:text-primary-500">Sportswear</a></li>
+              <li><a href="/men/innerwear" className="hover:text-primary-500">Innerwear</a></li>
+              <li><a href="/men/grooming" className="hover:text-primary-500">Grooming</a></li>
+              <li><a href="/men/watches" className="hover:text-primary-500">Watches</a></li>
+              <li><a href="/men/sunglasses" className="hover:text-primary-500">Sunglasses</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-black mb-4">Kids</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-500">Girls Clothing</a></li>
-              <li><a href="#" className="hover:text-primary-500">Boys Clothing</a></li>
-              <li><a href="#" className="hover:text-primary-500">Infants Girls</a></li>
-              <li><a href="#" className="hover:text-primary-500">Infants Boys</a></li>
-              <li><a href="#" className="hover:text-primary-500">Winterwear</a></li>
-              <li><a href="#" className="hover:text-primary-500">Add ons</a></li>
-              <li><a href="#" className="hover:text-primary-500">The Teen Shop</a></li>
+              <li><a href="/kids/girls-clothing" className="hover:text-primary-500">Girls Clothing</a></li>
+              <li><a href="/kids/boys-clothing" className="hover:text-primary-500">Boys Clothing</a></li>
+              <li><a href="/kids/infants-girls" className="hover:text-primary-500">Infants Girls</a></li>
+              <li><a href="/kids/infants-boys" className="hover:text-primary-500">Infants Boys</a></li>
+              <li><a href="/kids/winterwear" className="hover:text-primary-500">Winterwear</a></li>
+              <li><a href="/kids/add-ons" className="hover:text-primary-500">Add ons</a></li>
+              <li><a href="/kids/teen-shop" className="hover:text-primary-500">The Teen Shop</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-black mb-4">Shoes & Bags</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-500">Women</a></li>
-              <li><a href="#" className="hover:text-primary-500">Men</a></li>
-              <li><a href="#" className="hover:text-primary-500">Boys</a></li>
-              <li><a href="#" className="hover:text-primary-500">Girls</a></li>
-              <li><a href="#" className="hover:text-primary-500">Accessories</a></li>
-              <li><a href="#" className="hover:text-primary-500">Essentials</a></li>
+              <li><a href="/shoes-bags/women" className="hover:text-primary-500">Women</a></li>
+              <li><a href="/shoes-bags/men" className="hover:text-primary-500">Men</a></li>
+              <li><a href="/shoes-bags/boys" className="hover:text-primary-500">Boys</a></li>
+              <li><a href="/shoes-bags/girls" className="hover:text-primary-500">Girls</a></li>
+              <li><a href="/shoes-bags/accessories" className="hover:text-primary-500">Accessories</a></li>
+              <li><a href="/shoes-bags/essentials" className="hover:text-primary-500">Essentials</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-black mb-4">Beauty</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-500">Makeup Eyes</a></li>
-              <li><a href="#" className="hover:text-primary-500">Makeup Face</a></li>
-              <li><a href="#" className="hover:text-primary-500">Makeup Lips</a></li>
-              <li><a href="#" className="hover:text-primary-500">Makeup Nails</a></li>
-              <li><a href="#" className="hover:text-primary-500">Perfumes</a></li>
+              <li><a href="/beauty/makeup-eyes" className="hover:text-primary-500">Makeup Eyes</a></li>
+              <li><a href="/beauty/makeup-face" className="hover:text-primary-500">Makeup Face</a></li>
+              <li><a href="/beauty/makeup-lips" className="hover:text-primary-500">Makeup Lips</a></li>
+              <li><a href="/beauty/makeup-nails" className="hover:text-primary-500">Makeup Nails</a></li>
+              <li><a href="/beauty/perfumes" className="hover:text-primary-500">Perfumes</a></li>
             </ul>
           </div>
         </div>
