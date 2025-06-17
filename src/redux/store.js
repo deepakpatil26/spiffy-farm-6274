@@ -4,7 +4,7 @@ import {
   legacy_createStore,
   compose,
 } from "redux";
-import thunk from "redux-thunk";
+import { thunk } from "redux-thunk";
 import { reducer as MenReducer } from "./MenReducer/reducer";
 import { reducer as cartReducer } from "./cartReducer/reducer";
 
