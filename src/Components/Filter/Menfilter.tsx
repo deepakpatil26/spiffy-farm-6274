@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ChevronDownIcon, ChevronUpIcon } from "react-icons/md";
+import { MdOutlineKeyboardArrowDown, MdOutlineKeyboardArrowUp } from "react-icons/md";
 
 interface MenfilterProps {
   type: 'men' | 'women';
@@ -56,9 +56,9 @@ const Menfilter: React.FC<MenfilterProps> = ({ type }) => {
         >
           Filter By Price
           {showPriceFilter ? (
-            <ChevronUpIcon className="ml-2 h-5 w-5" />
+            <MdOutlineKeyboardArrowUp className="ml-2 h-5 w-5" />
           ) : (
-            <ChevronDownIcon className="ml-2 h-5 w-5" />
+            <MdOutlineKeyboardArrowDown className="ml-2 h-5 w-5" />
           )}
         </button>
         
@@ -98,9 +98,9 @@ const Menfilter: React.FC<MenfilterProps> = ({ type }) => {
         >
           Filter By Category
           {showCategoryFilter ? (
-            <ChevronUpIcon className="ml-2 h-5 w-5" />
+            <MdOutlineKeyboardArrowUp className="ml-2 h-5 w-5" />
           ) : (
-            <ChevronDownIcon className="ml-2 h-5 w-5" />
+            <MdOutlineKeyboardArrowDown className="ml-2 h-5 w-5" />
           )}
         </button>
         
