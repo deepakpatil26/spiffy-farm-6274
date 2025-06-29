@@ -29,8 +29,12 @@ const ManageUsers: React.FC = () => {
         throw new Error('Not authenticated');
       }
 
-      // Get the Supabase URL from the supabase client instance
-      const supabaseUrl = supabase.supabaseUrl;
+      // Use environment variable directly instead of accessing protected property
+      const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+      
+      if (!supabaseUrl) {
+        throw new Error('Supabase URL not configured');
+      }
       
       // Call the secure edge function instead of direct admin API
       const response = await fetch(
