@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { productService } from "../../services/productService";
@@ -26,13 +26,7 @@ const AdminEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (id) {
-      loadProduct(id);
-    }
-  }, [id]);
-
-  const loadProduct = async (productId: string) => {
+  const loadProduct = useCallback(async (productId: string) => {
     try {
       const productData = await productService.getProduct(productId);
       setProduct(productData);
@@ -42,7 +36,13 @@ const AdminEdit: React.FC = () => {
     } finally {
       setIsLoadingProduct(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (id) {
+      loadProduct(id);
+    }
+  }, [id, loadProduct]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

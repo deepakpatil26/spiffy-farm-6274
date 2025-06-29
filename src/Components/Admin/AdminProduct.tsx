@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import AdminSidebar from "./AdminSidebar";
@@ -12,7 +12,7 @@ const AdminProduct: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -26,11 +26,11 @@ const AdminProduct: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [category]);
 
   useEffect(() => {
     getData();
-  }, [category]);
+  }, [getData]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this product?")) {

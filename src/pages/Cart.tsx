@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -28,7 +28,7 @@ export const Cart: React.FC = () => {
     toast.error(message);
   };
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -40,11 +40,11 @@ export const Cart: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
 
   const handleDelete = async (item: any) => {
     const { id, title } = item;
