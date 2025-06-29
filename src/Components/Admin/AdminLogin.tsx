@@ -65,13 +65,6 @@ const AdminLogin: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             Access the admin panel
           </p>
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Admin Credentials:</strong><br />
-              Email: deepakpatil2612@gmail.com<br />
-              Password: Deepak@123
-            </p>
-          </div>
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-8">
