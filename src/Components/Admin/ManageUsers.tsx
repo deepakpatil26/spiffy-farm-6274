@@ -29,9 +29,12 @@ const ManageUsers: React.FC = () => {
         throw new Error('Not authenticated');
       }
 
+      // Get the Supabase URL from the supabase client instance
+      const supabaseUrl = supabase.supabaseUrl;
+      
       // Call the secure edge function instead of direct admin API
       const response = await fetch(
-        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-users`,
+        `${supabaseUrl}/functions/v1/admin-users`,
         {
           method: 'GET',
           headers: {
@@ -42,8 +45,18 @@ const ManageUsers: React.FC = () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch users');
+        // Check if response is HTML (error page) or JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+          throw new Error(`Edge function not found or not deployed. Status: ${response.status}`);
+        }
+        
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch users`);
+        } catch (jsonError) {
+          throw new Error(`HTTP ${response.status}: Failed to fetch users`);
+        }
       }
 
       const { users } = await response.json();
@@ -81,7 +94,16 @@ const ManageUsers: React.FC = () => {
         <AdminSidebar />
         <div className="ml-64 pt-16 p-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-700">{error}</p>
+            <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading Users</h3>
+            <p className="text-red-700 mb-4">{error}</p>
+            {error.includes('Edge function not found') && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
+                <p className="text-yellow-800 text-sm">
+                  <strong>Note:</strong> The admin-users Edge Function needs to be deployed to Supabase. 
+                  Please ensure the function is properly deployed and accessible.
+                </p>
+              </div>
+            )}
             <button 
               onClick={getData}
               className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
