@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Navbar from "../Components/Home/Navbar";
 import Footer from "../Components/Home/Footer";
 import { clearCart } from "../redux/cartReducer/action";
+import { orderService } from "../services/orderService";
 import { RootState, PaymentForm } from "../types";
 
 const initialState: PaymentForm = {
@@ -75,15 +76,27 @@ const Payment: React.FC = () => {
     setIsLoading(true);
     
     try {
+      // Create order in database
+      const orderItems = orderService.convertCartToOrderItems(cartItems);
+      const orderData = {
+        user_id: user?.id,
+        total: getTotalPrice(),
+        status: 'pending',
+        items: orderItems
+      };
+
+      await orderService.createOrder(orderData);
+
       // Clear cart
       await dispatch(clearCart(user?.id) as any);
 
       toast.success("Congratulations! Payment successful. Your order has been placed!");
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/order-history");
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Payment error:', error);
       toast.error("Payment failed. Please try again.");
     } finally {
       setIsLoading(false);

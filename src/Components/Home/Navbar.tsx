@@ -95,14 +95,14 @@ const Navbar: React.FC = () => {
                     )}
                   </div>
                   <Link 
-                    to="#" 
+                    to="/account" 
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setShowUserMenu(false)}
                   >
                     My Account
                   </Link>
                   <Link 
-                    to="#" 
+                    to="/order-history" 
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setShowUserMenu(false)}
                   >
