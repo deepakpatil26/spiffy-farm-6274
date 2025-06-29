@@ -22,14 +22,34 @@ const ManageUsers: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Note: This requires admin privileges in Supabase
-      // You might need to create a custom function or use the admin API
-      const { data, error } = await supabase.auth.admin.listUsers();
+      // Get the current session to include auth token
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (error) throw error;
-      setUserData(data.users as UserData[]);
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Call the secure edge function instead of direct admin API
+      const response = await fetch(
+        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-users`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch users');
+      }
+
+      const { users } = await response.json();
+      setUserData(users);
     } catch (err: any) {
-      setError("Failed to fetch users. Admin privileges required.");
+      setError(err.message || "Failed to fetch users");
       console.error("Error fetching users:", err);
     } finally {
       setIsLoading(false);
@@ -47,7 +67,7 @@ const ManageUsers: React.FC = () => {
         <AdminSidebar />
         <div className="ml-64 pt-16 p-8">
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
         </div>
       </>
@@ -64,7 +84,7 @@ const ManageUsers: React.FC = () => {
             <p className="text-red-700">{error}</p>
             <button 
               onClick={getData}
-              className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+              className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               Retry
             </button>
@@ -82,6 +102,9 @@ const ManageUsers: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Manage Users</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Total users: {userData.length}
+            </p>
           </div>
           
           <div className="overflow-x-auto">
@@ -105,18 +128,27 @@ const ManageUsers: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {userData.length > 0 ? (
                   userData.map((user, index) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.user_metadata?.first_name || 'N/A'} {user.user_metadata?.last_name || ''}
+                        {user.user_metadata?.first_name && user.user_metadata?.last_name
+                          ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+                          : user.user_metadata?.first_name || 'N/A'
+                        }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {user.email}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {new Date(user.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </td>
                     </tr>
                   ))
