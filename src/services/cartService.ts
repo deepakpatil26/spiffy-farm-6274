@@ -19,12 +19,14 @@ export const cartService = {
   // Add item to cart
   async addToCart(userId: string, productId: string, quantity: number = 1) {
     // Check if item already exists in cart
-    const { data: existingItem } = await supabase
+    const { data: existingItems } = await supabase
       .from('cart_items')
       .select('*')
       .eq('user_id', userId)
       .eq('product_id', productId)
-      .single()
+      .limit(1)
+    
+    const existingItem = existingItems?.[0]
     
     if (existingItem) {
       // Update quantity
