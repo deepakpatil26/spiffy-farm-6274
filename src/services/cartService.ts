@@ -19,7 +19,6 @@ export interface SupabaseCartItem {
     category: string
     gender: string
     type: string
-    discount?: number
   }
 }
 
@@ -45,8 +44,7 @@ export const cartService = {
           img4,
           category,
           gender,
-          type,
-          discount
+          type
         )
       `)
       .eq('user_id', userId)
