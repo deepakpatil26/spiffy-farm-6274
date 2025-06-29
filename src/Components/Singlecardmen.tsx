@@ -6,12 +6,14 @@ import { MdLocalShipping } from 'react-icons/md';
 import Footer from './Home/Footer';
 import Navbar from './Home/Navbar';
 import { productService } from '../services/productService';
-import { cartService } from '../services/cartService';
+import { addToCart } from '../redux/cartReducer/action';
 import { Product, RootState } from '../types';
+import { useAppDispatch } from '../redux/hooks';
 
 const Singlecardmen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(true);
@@ -44,22 +46,12 @@ const Singlecardmen: React.FC = () => {
     setError(null);
     
     try {
-      if (user) {
-        await cartService.addToCart(user.id, product.id, 1);
-      }
-      
-      // Also add to localStorage for non-authenticated users
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItemIndex = cart.findIndex((item: any) => item.id === product.id);
-      
-      if (existingItemIndex >= 0) {
-        cart[existingItemIndex].quantity += 1;
-      } else {
-        cart.push({ ...product, quantity: 1 });
-      }
-      
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
+      const cartItem = {
+        ...product,
+        quantity: 1,
+      };
+
+      await dispatch(addToCart(cartItem, user?.id) as any);
       toast.success('Added to cart successfully!');
     } catch (error: any) {
       setError(error.message);

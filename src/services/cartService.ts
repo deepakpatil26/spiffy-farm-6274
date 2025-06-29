@@ -1,5 +1,4 @@
 import { supabase } from '../lib/supabase'
-import { CartItem } from '../lib/supabase'
 
 export const cartService = {
   // Get cart items for user
@@ -7,13 +6,36 @@ export const cartService = {
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
-        *,
-        products (*)
+        id,
+        quantity,
+        created_at,
+        updated_at,
+        products (
+          id,
+          title,
+          price,
+          actualPrice,
+          image,
+          img1,
+          img2,
+          img3,
+          img4,
+          category,
+          gender,
+          type,
+          discount
+        )
       `)
       .eq('user_id', userId)
     
     if (error) throw error
-    return data || []
+    
+    // Transform the data to match CartItem interface
+    return (data || []).map(item => ({
+      ...item.products,
+      quantity: item.quantity,
+      cart_item_id: item.id
+    }))
   },
 
   // Add item to cart

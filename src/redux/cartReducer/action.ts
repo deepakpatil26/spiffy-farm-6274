@@ -39,8 +39,10 @@ export const loadCart = (userId: string) => async (dispatch: Dispatch) => {
       payload: cartItems,
     });
     dispatch(cartRequestSuccess());
+    return cartItems;
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -51,36 +53,43 @@ export const addToCart = (item: CartItem | CartItem[], userId?: string) => async
     if (Array.isArray(item)) {
       // Loading existing cart items
       dispatch({
-        type: ADD_TO_CART,
+        type: LOAD_CART,
         payload: item,
       });
     } else {
       // Adding new item
       if (userId) {
-        await cartService.addToCart(userId, item.id, item.quantity);
-      }
-      
-      dispatch({
-        type: ADD_TO_CART,
-        payload: item,
-      });
-      
-      // Save to localStorage as backup
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const existingItemIndex = cart.findIndex((cartItem: CartItem) => cartItem.id === item.id);
-      
-      if (existingItemIndex >= 0) {
-        cart[existingItemIndex].quantity += item.quantity;
+        await cartService.addToCart(userId, item.id, item.quantity || 1);
+        // Reload cart to get updated data
+        const updatedCart = await cartService.getCartItems(userId);
+        dispatch({
+          type: LOAD_CART,
+          payload: updatedCart,
+        });
       } else {
-        cart.push(item);
+        // Fallback to localStorage for non-authenticated users
+        dispatch({
+          type: ADD_TO_CART,
+          payload: item,
+        });
+        
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const existingItemIndex = cart.findIndex((cartItem: CartItem) => cartItem.id === item.id);
+        
+        if (existingItemIndex >= 0) {
+          cart[existingItemIndex].quantity += item.quantity || 1;
+        } else {
+          cart.push({ ...item, quantity: item.quantity || 1 });
+        }
+        
+        localStorage.setItem("cart", JSON.stringify(cart));
       }
-      
-      localStorage.setItem("cart", JSON.stringify(cart));
     }
     
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -89,24 +98,36 @@ export const removeFromCart = (id: string, userId?: string) => async (dispatch: 
   dispatch(cartRequestPending());
   try {
     if (userId) {
-      // Find cart item ID and remove from Supabase
-      // This would need the cart item ID, not product ID
-      // For now, we'll handle this in the component
+      // For authenticated users, we need to find the cart item by product ID and remove it
+      const cartItems = await cartService.getCartItems(userId);
+      const itemToRemove = cartItems.find(item => item.id === id);
+      
+      if (itemToRemove && itemToRemove.cart_item_id) {
+        await cartService.removeFromCart(itemToRemove.cart_item_id);
+      }
+      
+      // Reload cart
+      const updatedCart = await cartService.getCartItems(userId);
+      dispatch({
+        type: LOAD_CART,
+        payload: updatedCart,
+      });
+    } else {
+      // For non-authenticated users, use localStorage
+      dispatch({
+        type: REMOVE_FROM_CART,
+        payload: id,
+      });
+      
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedCart = cart.filter((item: CartItem) => item.id !== id);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
-    
-    dispatch({
-      type: REMOVE_FROM_CART,
-      payload: id,
-    });
-    
-    // Update localStorage
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = cart.filter((item: CartItem) => item.id !== id);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
     
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -114,21 +135,37 @@ export const removeFromCart = (id: string, userId?: string) => async (dispatch: 
 export const incrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
-    dispatch({
-      type: INCREMENT_QUANTITY,
-      payload: id,
-    });
-    
-    // Update localStorage
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = cart.map((item: CartItem) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    if (userId) {
+      const cartItems = await cartService.getCartItems(userId);
+      const item = cartItems.find(item => item.id === id);
+      
+      if (item && item.cart_item_id) {
+        await cartService.updateCartItem(item.cart_item_id, item.quantity + 1);
+      }
+      
+      // Reload cart
+      const updatedCart = await cartService.getCartItems(userId);
+      dispatch({
+        type: LOAD_CART,
+        payload: updatedCart,
+      });
+    } else {
+      dispatch({
+        type: INCREMENT_QUANTITY,
+        payload: id,
+      });
+      
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedCart = cart.map((item: CartItem) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    }
     
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -136,23 +173,39 @@ export const incrementQuantity = (id: string, userId?: string) => async (dispatc
 export const decrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
-    dispatch({
-      type: DECREMENT_QUANTITY,
-      payload: id,
-    });
-    
-    // Update localStorage
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = cart.map((item: CartItem) =>
-      item.id === id
-        ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-        : item
-    );
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    if (userId) {
+      const cartItems = await cartService.getCartItems(userId);
+      const item = cartItems.find(item => item.id === id);
+      
+      if (item && item.cart_item_id && item.quantity > 1) {
+        await cartService.updateCartItem(item.cart_item_id, item.quantity - 1);
+      }
+      
+      // Reload cart
+      const updatedCart = await cartService.getCartItems(userId);
+      dispatch({
+        type: LOAD_CART,
+        payload: updatedCart,
+      });
+    } else {
+      dispatch({
+        type: DECREMENT_QUANTITY,
+        payload: id,
+      });
+      
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedCart = cart.map((item: CartItem) =>
+        item.id === id
+          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
+          : item
+      );
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    }
     
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -169,5 +222,6 @@ export const clearCart = (userId?: string) => async (dispatch: Dispatch) => {
     dispatch(cartRequestSuccess());
   } catch (error: any) {
     dispatch(cartRequestFailure(error.message));
+    throw error;
   }
 };

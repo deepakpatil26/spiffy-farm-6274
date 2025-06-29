@@ -7,6 +7,7 @@ import {
   CART_REQUEST_SUCCESS,
   CART_REQUEST_FAILURE,
   CLEAR_CART,
+  LOAD_CART,
 } from "./actionTypes";
 import { CartState, CartItem } from "../../types";
 
@@ -22,6 +23,10 @@ interface CartAction {
   type: string;
   payload?: any;
 }
+
+const calculateTotal = (items: CartItem[]): number => {
+  return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+};
 
 export const reducer = (state = initialState, { type, payload }: CartAction): CartState => {
   switch (type) {
@@ -46,30 +51,51 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
         error: payload,
       };
 
+    case LOAD_CART:
+      return {
+        ...state,
+        items: payload,
+        cartItems: payload,
+        total: calculateTotal(payload),
+      };
+
     case ADD_TO_CART:
       if (Array.isArray(payload)) {
         return {
           ...state,
           items: payload,
           cartItems: payload,
-          total: payload.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0),
+          total: calculateTotal(payload),
         };
       }
-      return {
-        ...state,
-        items: [...state.items, { ...payload, quantity: 1 }],
-        cartItems: [...state.cartItems, { ...payload, quantity: 1 }],
-        total: state.total + payload.price,
-      };
-
-    case REMOVE_FROM_CART:
-      const itemToRemove = state.items.find((item: CartItem) => item.id === payload);
-      const newItems = state.items.filter((item: CartItem) => item.id !== payload);
+      
+      const existingItemIndex = state.items.findIndex(item => item.id === payload.id);
+      let newItems;
+      
+      if (existingItemIndex >= 0) {
+        newItems = state.items.map((item, index) =>
+          index === existingItemIndex
+            ? { ...item, quantity: item.quantity + (payload.quantity || 1) }
+            : item
+        );
+      } else {
+        newItems = [...state.items, { ...payload, quantity: payload.quantity || 1 }];
+      }
+      
       return {
         ...state,
         items: newItems,
         cartItems: newItems,
-        total: state.total - (itemToRemove ? itemToRemove.price * itemToRemove.quantity : 0),
+        total: calculateTotal(newItems),
+      };
+
+    case REMOVE_FROM_CART:
+      const filteredItems = state.items.filter((item: CartItem) => item.id !== payload);
+      return {
+        ...state,
+        items: filteredItems,
+        cartItems: filteredItems,
+        total: calculateTotal(filteredItems),
       };
 
     case INCREMENT_QUANTITY:
@@ -80,7 +106,7 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
         ...state,
         items: incrementedItems,
         cartItems: incrementedItems,
-        total: state.total + (state.items.find((item: CartItem) => item.id === payload)?.price || 0),
+        total: calculateTotal(incrementedItems),
       };
 
     case DECREMENT_QUANTITY:
@@ -89,12 +115,11 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       );
-      const decrementPrice = state.items.find((item: CartItem) => item.id === payload);
       return {
         ...state,
         items: decrementedItems,
         cartItems: decrementedItems,
-        total: state.total - (decrementPrice && decrementPrice.quantity > 1 ? decrementPrice.price : 0),
+        total: calculateTotal(decrementedItems),
       };
 
     case CLEAR_CART:

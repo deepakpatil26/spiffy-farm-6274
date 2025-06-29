@@ -1,46 +1,46 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
-  addToCart,
-  decrementQuantity,
-  incrementQuantity,
   removeFromCart,
+  incrementQuantity,
+  decrementQuantity,
+  loadCart,
 } from "../redux/cartReducer/action";
-import axios from "axios";
 import Navbar from "../Components/Home/Navbar";
 import Footer from "../Components/Home/Footer";
 import { RootState } from "../types";
 import { toast } from 'react-toastify';
 import { AiOutlineClose, AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-
-const API_BASE_URL = "https://lifestyle-mock-server-api.onrender.com";
+import { useAppDispatch } from "../redux/hooks";
 
 export const Cart: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { cartItems } = useSelector((store: RootState) => store.cartReducer);
+  const { user } = useSelector((store: RootState) => store.AuthReducer);
 
   const showErrorToast = (message: string) => {
     toast.error(message);
   };
 
   const getData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${API_BASE_URL}/cart`);
-      dispatch(addToCart(response.data) as any);
-    } catch (error) {
-      setError("Failed to fetch cart items");
-      showErrorToast("Failed to load cart items. Please try again.");
-    } finally {
-      setIsLoading(false);
+    if (user) {
+      setIsLoading(true);
+      setError(null);
+      try {
+        await dispatch(loadCart(user.id) as any);
+      } catch (error) {
+        setError("Failed to fetch cart items");
+        showErrorToast("Failed to load cart items. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [dispatch]);
+  }, [dispatch, user]);
 
   useEffect(() => {
     getData();
@@ -50,8 +50,7 @@ export const Cart: React.FC = () => {
     const { id, title } = item;
     setIsLoading(true);
     try {
-      await axios.delete(`${API_BASE_URL}/cart/${id}`);
-      dispatch(removeFromCart(id) as any);
+      await dispatch(removeFromCart(id, user?.id) as any);
       toast.success(`${title} has been removed from your cart`);
     } catch (error) {
       showErrorToast("Failed to remove item. Please try again.");
@@ -60,18 +59,10 @@ export const Cart: React.FC = () => {
     }
   };
 
-  const updateQuantity = async (id: string, newQuantity: number, action: 'increment' | 'decrement') => {
-    if (newQuantity < 1) return;
+  const handleINC = async (id: string, currentQuantity: number) => {
     setIsLoading(true);
     try {
-      await axios.patch(`${API_BASE_URL}/cart/${id}`, {
-        quantity: newQuantity,
-      });
-      if (action === 'increment') {
-        dispatch(incrementQuantity(id) as any);
-      } else {
-        dispatch(decrementQuantity(id) as any);
-      }
+      await dispatch(incrementQuantity(id, user?.id) as any);
     } catch (error) {
       showErrorToast("Failed to update quantity. Please try again.");
     } finally {
@@ -79,13 +70,16 @@ export const Cart: React.FC = () => {
     }
   };
 
-  const handleINC = (id: string, currentQuantity: number) => {
-    updateQuantity(id, currentQuantity + 1, 'increment');
-  };
-
-  const handleDEC = (id: string, currentQuantity: number) => {
+  const handleDEC = async (id: string, currentQuantity: number) => {
     if (currentQuantity > 1) {
-      updateQuantity(id, currentQuantity - 1, 'decrement');
+      setIsLoading(true);
+      try {
+        await dispatch(decrementQuantity(id, user?.id) as any);
+      } catch (error) {
+        showErrorToast("Failed to update quantity. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

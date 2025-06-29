@@ -9,10 +9,9 @@ import SearchBar from "./SearchBar";
 import SideBar from "./Sidebar";
 import { RootState } from "../../types";
 import { signOut } from "../../redux/authReducer/action";
-import { addToCart } from "../../redux/cartReducer/action";
+import { loadCart } from "../../redux/cartReducer/action";
 import { loadWishlist } from "../../redux/wishlistReducer/action";
 import { useAppDispatch } from "../../redux/hooks";
-import axios from "axios";
 import { toast } from 'react-toastify';
 
 const Navbar: React.FC = () => {
@@ -27,16 +26,8 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     if (isAuth && user) {
-      // Load cart items
-      axios
-        .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
-        .then((res) => {
-          dispatch(addToCart(res.data));
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
+      // Load cart items from Supabase
+      dispatch(loadCart(user.id) as any);
       // Load wishlist items
       dispatch(loadWishlist(user.id) as any);
     }
