@@ -31,7 +31,7 @@ const ManageUsers: React.FC = () => {
 
       // Call the secure edge function instead of direct admin API
       const response = await fetch(
-        `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-users`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users`,
         {
           method: 'GET',
           headers: {
