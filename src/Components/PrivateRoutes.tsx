@@ -34,7 +34,23 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ children }) => {
 
   // Additional check for admin routes
   if (isAdminRoute && !isAdmin) {
-    return <Navigate to="/" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-red-500 text-6xl mb-4">🚫</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+          <p className="text-gray-600 mb-6">
+            You don't have permission to access this admin area. Please contact an administrator if you believe this is an error.
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

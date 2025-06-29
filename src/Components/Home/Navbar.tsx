@@ -8,7 +8,7 @@ import HomeMenu from "./HomeMenu";
 import SearchBar from "./SearchBar";
 import SideBar from "./Sidebar";
 import { RootState } from "../../types";
-import { logout } from "../../redux/authReducer/action";
+import { signOut } from "../../redux/authReducer/action";
 import { addToCart } from "../../redux/cartReducer/action";
 import { useAppDispatch } from "../../redux/hooks";
 import axios from "axios";
@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   
-  const { isAuth, afterLoginUser } = useSelector((state: RootState) => state.AuthReducer);
+  const { isAuth, afterLoginUser, isAdmin } = useSelector((state: RootState) => state.AuthReducer);
   const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Navbar: React.FC = () => {
   }, [dispatch, isAuth]);
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(signOut());
     setShowUserMenu(false);
     toast.success('Logged out successfully');
     navigate('/');
@@ -90,6 +90,9 @@ const Navbar: React.FC = () => {
                 <div className="py-1">
                   <div className="px-4 py-2 text-sm text-gray-700 border-b">
                     Hey, {isAuth ? afterLoginUser.name : "User"}
+                    {isAdmin && (
+                      <span className="block text-xs text-primary-600 font-medium">Admin</span>
+                    )}
                   </div>
                   <Link 
                     to="#" 
@@ -105,13 +108,24 @@ const Navbar: React.FC = () => {
                   >
                     Order History
                   </Link>
-                  <Link 
-                    to="/adminLogin" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Admin
-                  </Link>
+                  {isAdmin && (
+                    <Link 
+                      to="/admin" 
+                      className="block px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 font-medium"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
+                  {!isAuth && (
+                    <Link 
+                      to="/adminLogin" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Admin Login
+                    </Link>
+                  )}
                   {isAuth ? (
                     <button
                       onClick={handleLogout}

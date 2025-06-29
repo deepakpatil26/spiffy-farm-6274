@@ -29,6 +29,13 @@ interface AuthAction {
   payload?: any;
 }
 
+// Admin email list - you can expand this or move to environment variables
+const ADMIN_EMAILS = ['deepakpatil2612@gmail.com'];
+
+const checkIsAdmin = (email: string): boolean => {
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+};
+
 export const reducer = (state = initialState, action: AuthAction): AuthState => {
   const { type, payload } = action;
   
@@ -64,15 +71,19 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
       };
 
     case SIGNIN_SUCCESS:
+      const userEmail = payload.user?.email || '';
+      const isAdmin = checkIsAdmin(userEmail);
+      
       return {
         ...state,
         isLoading: false,
         isAuth: true,
         user: payload.user,
         session: payload.session,
+        isAdmin: isAdmin,
         afterLoginUser: {
-          email: payload.user?.email || '',
-          name: payload.user?.user_metadata?.first_name || '',
+          email: userEmail,
+          name: payload.user?.user_metadata?.first_name || payload.user?.email?.split('@')[0] || '',
           password: '',
         },
         isError: false,
@@ -86,6 +97,7 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         isAuth: false,
         user: null,
         session: null,
+        isAdmin: false,
       };
       
     case SIGNOUT:
@@ -100,13 +112,18 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         afterLoginUser: {} as AuthUser,
         user: null,
         session: null,
+        isAdmin: false,
       };
       
     case GET_USER:
+      const getUserEmail = payload?.email || '';
+      const getUserIsAdmin = checkIsAdmin(getUserEmail);
+      
       return {
         ...state,
         user: payload,
         isAuth: !!payload,
+        isAdmin: getUserIsAdmin,
       };
       
     default:

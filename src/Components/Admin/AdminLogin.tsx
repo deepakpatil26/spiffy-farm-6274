@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { signIn } from "../../redux/authReducer/action";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useAppDispatch } from "../../redux/hooks";
+import { RootState } from "../../types";
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +13,18 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+
+  const { isAuth, isAdmin } = useSelector((state: RootState) => state.AuthReducer);
+
+  useEffect(() => {
+    if (isAuth && isAdmin) {
+      navigate("/admin");
+    } else if (isAuth && !isAdmin) {
+      toast.error("Access denied. Admin privileges required.");
+      navigate("/");
+    }
+  }, [isAuth, isAdmin, navigate]);
 
   const validateForm = () => {
     if (!email || !password) {
@@ -27,12 +40,12 @@ const AdminLogin: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await dispatch(signIn({ email, password }) as any);
+      await dispatch(signIn({ email, password }));
       
-      toast.success("Login successful! Welcome to admin panel!");
+      // The useEffect will handle navigation based on admin status
+      toast.success("Login successful!");
       setEmail("");
       setPassword("");
-      navigate("/admin");
     } catch (error: any) {
       toast.error("Invalid credentials. Please check your email and password.");
       setEmail("");
@@ -52,6 +65,13 @@ const AdminLogin: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             Access the admin panel
           </p>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Admin Credentials:</strong><br />
+              Email: deepakpatil2612@gmail.com<br />
+              Password: Deepak@123
+            </p>
+          </div>
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-8">
