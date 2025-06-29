@@ -10,6 +10,7 @@ import SideBar from "./Sidebar";
 import { RootState } from "../../types";
 import { signOut } from "../../redux/authReducer/action";
 import { addToCart } from "../../redux/cartReducer/action";
+import { loadWishlist } from "../../redux/wishlistReducer/action";
 import { useAppDispatch } from "../../redux/hooks";
 import axios from "axios";
 import { toast } from 'react-toastify';
@@ -20,11 +21,13 @@ const Navbar: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   
-  const { isAuth, afterLoginUser, isAdmin } = useSelector((state: RootState) => state.AuthReducer);
+  const { isAuth, afterLoginUser, isAdmin, user } = useSelector((state: RootState) => state.AuthReducer);
   const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);
+  const { items: wishlistItems = [] } = useSelector((state: RootState) => state.wishlistReducer);
 
   useEffect(() => {
-    if (isAuth) {
+    if (isAuth && user) {
+      // Load cart items
       axios
         .get(`https://lifestyle-mock-server-api.onrender.com/cart`)
         .then((res) => {
@@ -33,8 +36,11 @@ const Navbar: React.FC = () => {
         .catch((err) => {
           console.log(err);
         });
+
+      // Load wishlist items
+      dispatch(loadWishlist(user.id) as any);
     }
-  }, [dispatch, isAuth]);
+  }, [dispatch, isAuth, user]);
 
   const handleLogout = () => {
     dispatch(signOut());
@@ -108,6 +114,15 @@ const Navbar: React.FC = () => {
                   >
                     Order History
                   </Link>
+                  {isAuth && (
+                    <Link 
+                      to="/wishlist" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      My Wishlist
+                    </Link>
+                  )}
                   {isAdmin && (
                     <Link 
                       to="/admin" 
@@ -148,8 +163,13 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Wishlist */}
-          <Link to="#" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <Link to="/wishlist" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
             <AiOutlineHeart className="w-5 h-5" />
+            {isAuth && wishlistItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {wishlistItems.length}
+              </span>
+            )}
           </Link>
 
           {/* Cart */}

@@ -12,6 +12,7 @@ import Payment from "../pages/Payment";
 import { Cart } from "../pages/Cart";
 import Account from "../pages/Account";
 import OrderHistory from "../pages/OrderHistory";
+import Wishlist from "../pages/Wishlist";
 import AdminProduct from "./Admin/AdminProduct";
 import AdminManageProduct from "./Admin/AdminManageProduct";
 import AdminEdit from "./Admin/AdminEdit";
@@ -40,6 +41,7 @@ const MainRoutes: React.FC = () => {
         <Route path="/checkout" element={<PrivateRoutes><Checkout /></PrivateRoutes>} />
         <Route path="/payment" element={<PrivateRoutes><Payment /></PrivateRoutes>} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/account" element={<PrivateRoutes><Account /></PrivateRoutes>} />
         <Route path="/order-history" element={<PrivateRoutes><OrderHistory /></PrivateRoutes>} />
         <Route path="/adminLogin" element={<AdminLogin />} />

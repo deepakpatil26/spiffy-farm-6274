@@ -9,12 +9,14 @@ import { thunk } from "redux-thunk";
 import { reducer as MenReducer } from "./MenReducer/reducer";
 import { reducer as cartReducer } from "./cartReducer/reducer";
 import { reducer as AuthReducer } from "../redux/authReducer/reducer";
+import { reducer as wishlistReducer } from "./wishlistReducer/reducer";
 import { RootState } from "../types";
 
 const rootReducer = combineReducers({
   MenReducer,
   AuthReducer,
   cartReducer,
+  wishlistReducer,
 });
 
 const composeEnhancers =

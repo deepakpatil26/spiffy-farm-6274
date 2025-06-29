@@ -22,6 +22,15 @@ export interface CartItem extends Product {
   cart_item_id?: string; // For Supabase cart items
 }
 
+// Wishlist Types
+export interface WishlistItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
+  product?: Product;
+}
+
 // User Types
 export interface User {
   id?: string;
@@ -89,10 +98,17 @@ export interface CartState {
   total: number;
 }
 
+export interface WishlistState {
+  items: WishlistItem[];
+  isLoading: boolean;
+  error: string | null;
+}
+
 export interface RootState {
   AuthReducer: AuthState;
   MenReducer: ProductState;
   cartReducer: CartState;
+  wishlistReducer: WishlistState;
 }
 
 // Component Props Types
