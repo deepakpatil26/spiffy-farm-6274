@@ -54,8 +54,9 @@ export const cartService = {
     if (error) throw error
     
     // Transform the data to match CartItem interface
-    return (data as SupabaseCartItem[] || []).map(item => ({
+    return (data || []).map((item: any) => ({
       ...item.products,
+      gender: item.products.gender as 'men' | 'women', // Type assertion for gender
       quantity: item.quantity,
       cart_item_id: item.id
     }))
