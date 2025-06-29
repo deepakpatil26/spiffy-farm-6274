@@ -4,9 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineClose } from "react-icons/ai";
 import Logo from "../../Asssets/logo2.png";
 import LogoImage from "../../Asssets/LogoI.png";
-import { logout } from "../../redux/authReducer/action";
+import { signOut } from "../../redux/authReducer/action";
 import { RootState } from "../../types";
 import { toast } from 'react-toastify';
+import { useAppDispatch } from "../../redux/hooks";
 
 interface SideBarProps {
   isOpen: boolean;
@@ -15,11 +16,11 @@ interface SideBarProps {
 
 const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
   const { isAuth } = useSelector((state: RootState) => state.AuthReducer);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(signOut());
     onClose();
     toast.success('Logged out successfully');
     navigate('/');

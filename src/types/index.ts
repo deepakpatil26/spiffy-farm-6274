@@ -104,12 +104,12 @@ export interface FilterProps {
   type: 'men' | 'women';
 }
 
-// API Query Parameters
+// API Query Parameters - Updated to match actual usage
 export interface QueryParams {
   params: {
     category?: string[];
     _page?: string | null;
-    _sort?: string | boolean;
+    _sort?: string | null;
     _order?: string | null;
   };
 }

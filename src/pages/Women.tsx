@@ -8,11 +8,12 @@ import Navbar from "../Components/Home/Navbar";
 import Footer from "../Components/Home/Footer";
 import Menfilter from "../Components/Filter/Menfilter";
 import { RootState } from "../types";
+import { useAppDispatch } from "../redux/hooks";
 
 export const Women: React.FC = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { women, isLoading, isError, total } = useSelector((store: RootState) => store.MenReducer);
@@ -21,13 +22,13 @@ export const Women: React.FC = () => {
     params: {
       category: searchParams.getAll("category"),
       _page: searchParams.get("page"),
-      _sort: searchParams.get("order") && "price",
+      _sort: searchParams.get("order") ? "price" : null,
       _order: searchParams.get("order"),
     },
   };
 
   useEffect(() => {
-    dispatch(getwomens(queryParams) as any);
+    dispatch(getwomens(queryParams));
   }, [location.search, dispatch]);
 
   if (isLoading) {
@@ -56,7 +57,7 @@ export const Women: React.FC = () => {
                   Something went wrong while loading the products.
                   <button 
                     className="ml-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
-                    onClick={() => dispatch(getwomens(queryParams) as any)}
+                    onClick={() => dispatch(getwomens(queryParams))}
                   >
                     Try Again
                   </button>
