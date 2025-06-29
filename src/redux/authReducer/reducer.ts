@@ -102,17 +102,7 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
       
     case SIGNOUT:
       return {
-        ...state,
-        isAuth: false,
-        isLoading: false,
-        isError: false,
-        successCreate: false,
-        createAccountLoading: false,
-        createError: false,
-        afterLoginUser: {} as AuthUser,
-        user: null,
-        session: null,
-        isAdmin: false,
+        ...initialState, // Reset to initial state to clear cart and other data
       };
       
     case GET_USER:

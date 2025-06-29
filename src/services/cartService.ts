@@ -1,8 +1,31 @@
 import { supabase } from '../lib/supabase'
+import { CartItem } from '../types'
+
+export interface SupabaseCartItem {
+  id: string
+  quantity: number
+  created_at: string
+  updated_at: string
+  products: {
+    id: string
+    title: string
+    price: number
+    actualPrice: number
+    image: string
+    img1?: string
+    img2?: string
+    img3?: string
+    img4?: string
+    category: string
+    gender: string
+    type: string
+    discount?: number
+  }
+}
 
 export const cartService = {
   // Get cart items for user
-  async getCartItems(userId: string) {
+  async getCartItems(userId: string): Promise<CartItem[]> {
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
@@ -31,7 +54,7 @@ export const cartService = {
     if (error) throw error
     
     // Transform the data to match CartItem interface
-    return (data || []).map(item => ({
+    return (data as SupabaseCartItem[] || []).map(item => ({
       ...item.products,
       quantity: item.quantity,
       cart_item_id: item.id

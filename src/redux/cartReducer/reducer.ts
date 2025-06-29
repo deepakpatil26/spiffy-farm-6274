@@ -11,9 +11,17 @@ import {
 } from "./actionTypes";
 import { CartState, CartItem } from "../../types";
 
+const getInitialCartState = (): CartItem[] => {
+  try {
+    return JSON.parse(localStorage.getItem("cart") || "[]");
+  } catch {
+    return [];
+  }
+};
+
 const initialState: CartState = {
-  items: JSON.parse(localStorage.getItem("cart") || "[]"),
-  cartItems: JSON.parse(localStorage.getItem("cart") || "[]"),
+  items: [],
+  cartItems: [],
   isLoading: false,
   error: null,
   total: 0,

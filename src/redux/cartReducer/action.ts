@@ -94,13 +94,13 @@ export const addToCart = (item: CartItem | CartItem[], userId?: string) => async
 };
 
 // Remove item from cart
-export const removeFromCart = (id: string, userId?: string) => async (dispatch: Dispatch) => {
+export const removeFromCart = (productId: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
     if (userId) {
       // For authenticated users, we need to find the cart item by product ID and remove it
       const cartItems = await cartService.getCartItems(userId);
-      const itemToRemove = cartItems.find(item => item.id === id);
+      const itemToRemove = cartItems.find((item: CartItem) => item.id === productId);
       
       if (itemToRemove && itemToRemove.cart_item_id) {
         await cartService.removeFromCart(itemToRemove.cart_item_id);
@@ -116,11 +116,11 @@ export const removeFromCart = (id: string, userId?: string) => async (dispatch: 
       // For non-authenticated users, use localStorage
       dispatch({
         type: REMOVE_FROM_CART,
-        payload: id,
+        payload: productId,
       });
       
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const updatedCart = cart.filter((item: CartItem) => item.id !== id);
+      const updatedCart = cart.filter((item: CartItem) => item.id !== productId);
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
     
@@ -132,12 +132,12 @@ export const removeFromCart = (id: string, userId?: string) => async (dispatch: 
 };
 
 // Increment item quantity
-export const incrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
+export const incrementQuantity = (productId: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
     if (userId) {
       const cartItems = await cartService.getCartItems(userId);
-      const item = cartItems.find(item => item.id === id);
+      const item = cartItems.find((cartItem: CartItem) => cartItem.id === productId);
       
       if (item && item.cart_item_id) {
         await cartService.updateCartItem(item.cart_item_id, item.quantity + 1);
@@ -152,12 +152,12 @@ export const incrementQuantity = (id: string, userId?: string) => async (dispatc
     } else {
       dispatch({
         type: INCREMENT_QUANTITY,
-        payload: id,
+        payload: productId,
       });
       
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const updatedCart = cart.map((item: CartItem) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
@@ -170,12 +170,12 @@ export const incrementQuantity = (id: string, userId?: string) => async (dispatc
 };
 
 // Decrement item quantity
-export const decrementQuantity = (id: string, userId?: string) => async (dispatch: Dispatch) => {
+export const decrementQuantity = (productId: string, userId?: string) => async (dispatch: Dispatch) => {
   dispatch(cartRequestPending());
   try {
     if (userId) {
       const cartItems = await cartService.getCartItems(userId);
-      const item = cartItems.find(item => item.id === id);
+      const item = cartItems.find((cartItem: CartItem) => cartItem.id === productId);
       
       if (item && item.cart_item_id && item.quantity > 1) {
         await cartService.updateCartItem(item.cart_item_id, item.quantity - 1);
@@ -190,12 +190,12 @@ export const decrementQuantity = (id: string, userId?: string) => async (dispatc
     } else {
       dispatch({
         type: DECREMENT_QUANTITY,
-        payload: id,
+        payload: productId,
       });
       
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       const updatedCart = cart.map((item: CartItem) =>
-        item.id === id
+        item.id === productId
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
           : item
       );
