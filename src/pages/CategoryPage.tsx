@@ -6,7 +6,8 @@ import NewCard from "../Components/NewCard";
 import { newProductService } from "../services/newProductService";
 import { Product, Category } from "../types";
 import { toast } from "react-toastify";
-import { AiOutlineFilter, AiOutlineGrid, AiOutlineList } from "react-icons/ai";
+import { AiOutlineFilter } from "react-icons/ai";
+import { BsGrid, BsList } from "react-icons/bs";
 
 const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -145,13 +146,13 @@ const CategoryPage: React.FC = () => {
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-600'}`}
                   >
-                    <AiOutlineGrid className="w-5 h-5" />
+                    <BsGrid className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-600'}`}
                   >
-                    <AiOutlineList className="w-5 h-5" />
+                    <BsList className="w-5 h-5" />
                   </button>
                 </div>
               </div>

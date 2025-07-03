@@ -24,6 +24,10 @@ export interface Product {
   price: number;
   actualPrice?: number;
   image: string;
+  img1?: string;
+  img2?: string;
+  img3?: string;
+  img4?: string;
   images?: string[];
   description?: string;
   category: string;
@@ -31,6 +35,7 @@ export interface Product {
   categorySlug?: string;
   slug?: string;
   type?: string;
+  gender?: string;
   discount?: number;
   created_at?: string;
 }
