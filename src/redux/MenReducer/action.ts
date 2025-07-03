@@ -8,6 +8,7 @@ import {
   WOMEN_REQUEST_SUCCESS,
 } from "./actionType";
 import { productService, ProductFilters } from "../../services/productService";
+import { newProductService } from "../../services/newProductService";
 import { QueryParams, Product, ApiResponse } from "../../types";
 
 export const getmens = (queryParams: QueryParams) => async (dispatch: Dispatch) => {
@@ -57,5 +58,40 @@ export const getwomens = (queryParams: QueryParams) => async (dispatch: Dispatch
   } catch (error) {
     console.error('Error fetching women products:', error);
     dispatch({ type: WOMEN_REQUEST_FAILURE });
+  }
+};
+
+// New actions for API integration
+export const getProductsByCategory = (categorySlug: string, limit = 12, offset = 0) => async (dispatch: Dispatch) => {
+  dispatch({ type: MEN_REQUEST_PENDING });
+  try {
+    const result = await newProductService.getProductsByCategorySlug(categorySlug, limit, offset);
+    
+    const obj: ApiResponse<Product[]> = {
+      data: result.data,
+      total: result.total,
+    };
+    
+    dispatch({ type: MEN_REQUEST_SUCCESS, payload: obj });
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    dispatch({ type: MEN_REQUEST_FAILURE });
+  }
+};
+
+export const searchProducts = (query: string, limit = 12) => async (dispatch: Dispatch) => {
+  dispatch({ type: MEN_REQUEST_PENDING });
+  try {
+    const result = await newProductService.searchProducts(query, limit);
+    
+    const obj: ApiResponse<Product[]> = {
+      data: result.data,
+      total: result.total,
+    };
+    
+    dispatch({ type: MEN_REQUEST_SUCCESS, payload: obj });
+  } catch (error) {
+    console.error('Error searching products:', error);
+    dispatch({ type: MEN_REQUEST_FAILURE });
   }
 };
