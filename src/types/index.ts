@@ -1,17 +1,36 @@
-// Product Types
+// Product Types - Updated for new API structure
+export interface ApiProduct {
+  id: number;
+  title: string;
+  slug: string;
+  price: number;
+  description: string;
+  category: {
+    id: number;
+    name: string;
+    slug: string;
+    image: string;
+    creationAt: string;
+    updatedAt: string;
+  };
+  images: string[];
+  creationAt: string;
+  updatedAt: string;
+}
+
 export interface Product {
   id: string;
   title: string;
   price: number;
-  actualPrice: number;
+  actualPrice?: number;
   image: string;
-  img1?: string;
-  img2?: string;
-  img3?: string;
-  img4?: string;
+  images?: string[];
+  description?: string;
   category: string;
-  gender: 'men' | 'women';
-  type: string;
+  categoryId?: number;
+  categorySlug?: string;
+  slug?: string;
+  type?: string;
   discount?: number;
   created_at?: string;
 }
@@ -63,6 +82,16 @@ export interface ApiResponse<T> {
   total?: number;
 }
 
+// Category Types
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+  creationAt: string;
+  updatedAt: string;
+}
+
 // Redux State Types
 export interface AuthState {
   createAccountLoading: boolean;
@@ -86,6 +115,8 @@ export interface ProductState {
   total: number;
   men: Product[];
   women: Product[];
+  products: Product[];
+  categories: Category[];
   isLoading: boolean;
   isError: boolean;
 }
@@ -113,20 +144,23 @@ export interface RootState {
 
 // Component Props Types
 export interface CardProps extends Product {
-  type: 'men' | 'women';
+  type?: string;
 }
 
 export interface FilterProps {
-  type: 'men' | 'women';
+  type?: string;
+  categories?: Category[];
 }
 
-// API Query Parameters - Updated to match actual usage
+// API Query Parameters
 export interface QueryParams {
   params: {
     category?: string[];
+    categoryId?: number[];
     _page?: string | null;
     _sort?: string | null;
     _order?: string | null;
+    _limit?: number;
   };
 }
 

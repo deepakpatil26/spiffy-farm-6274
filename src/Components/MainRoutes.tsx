@@ -1,6 +1,8 @@
 import React, { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import HomePage from "../pages/HomePage";
+import NewHomePage from "../pages/NewHomePage";
+import CategoryPage from "../pages/CategoryPage";
+import ProductDetailPage from "../pages/ProductDetailPage";
 import { Men } from "../pages/Men";
 import { Women } from "../pages/Women";
 import Singlecardwomen from "./Singlecard";
@@ -31,22 +33,31 @@ const MainRoutes: React.FC = () => {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        {/* New Routes with API Integration */}
+        <Route path="/" element={<NewHomePage />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+        
+        {/* Legacy Routes (keeping for backward compatibility) */}
         <Route path="/men" element={<Men />} />
         <Route path="/women" element={<Women />} />
         <Route path="/men/:id" element={<Singlecardmen />} />
         <Route path="/women/:id" element={<Singlecardwomen />} />
+        
+        {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        
+        {/* Protected Routes */}
         <Route path="/checkout" element={<PrivateRoutes><Checkout /></PrivateRoutes>} />
         <Route path="/payment" element={<PrivateRoutes><Payment /></PrivateRoutes>} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/account" element={<PrivateRoutes><Account /></PrivateRoutes>} />
         <Route path="/order-history" element={<PrivateRoutes><OrderHistory /></PrivateRoutes>} />
-        <Route path="/adminLogin" element={<AdminLogin />} />
         
-        {/* Protected Admin Routes */}
+        {/* Admin Routes */}
+        <Route path="/adminLogin" element={<AdminLogin />} />
         <Route path="/admin" element={<PrivateRoutes><Admin /></PrivateRoutes>} />
         <Route path="/products" element={<PrivateRoutes><AdminProduct /></PrivateRoutes>} />
         <Route path="/manageProduct" element={<PrivateRoutes><AdminManageProduct /></PrivateRoutes>} />
