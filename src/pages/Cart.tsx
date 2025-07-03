@@ -187,7 +187,7 @@ export const Cart: React.FC = () => {
             <p className="mt-1 text-gray-500">Start shopping to add items to your cart.</p>
             <div className="mt-6">
               <button
-                onClick={() => navigate("/products")}
+                onClick={() => navigate("/")}
                 className="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Continue Shopping
