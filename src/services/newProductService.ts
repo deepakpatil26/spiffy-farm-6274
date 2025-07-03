@@ -16,6 +16,7 @@ const transformApiProduct = (apiProduct: ApiProduct): Product => ({
   id: apiProduct.id.toString(),
   title: apiProduct.title,
   price: apiProduct.price,
+  actualPrice: apiProduct.price, // Default to same as price
   image: apiProduct.images[0] || 'https://placehold.co/600x400',
   images: apiProduct.images,
   description: apiProduct.description,
@@ -23,6 +24,8 @@ const transformApiProduct = (apiProduct: ApiProduct): Product => ({
   categoryId: apiProduct.category.id,
   categorySlug: apiProduct.category.slug,
   slug: apiProduct.slug,
+  type: 'regular', // Default type
+  gender: 'men', // Default gender
   created_at: apiProduct.creationAt,
 });
 

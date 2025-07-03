@@ -22,7 +22,7 @@ export interface Product {
   id: string;
   title: string;
   price: number;
-  actualPrice?: number;
+  actualPrice: number;
   image: string;
   img1?: string;
   img2?: string;
@@ -34,8 +34,8 @@ export interface Product {
   categoryId?: number;
   categorySlug?: string;
   slug?: string;
-  type?: string;
-  gender?: string;
+  type: string;
+  gender: 'men' | 'women';
   discount?: number;
   created_at?: string;
 }
@@ -148,8 +148,8 @@ export interface RootState {
 }
 
 // Component Props Types
-export interface CardProps extends Product {
-  type?: string;
+export interface CardProps extends Omit<Product, 'type'> {
+  type: string;
 }
 
 export interface FilterProps {

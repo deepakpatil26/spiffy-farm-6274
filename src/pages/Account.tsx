@@ -6,7 +6,12 @@ import Navbar from "../Components/Home/Navbar";
 import Footer from "../Components/Home/Footer";
 import { supabase } from "../lib/supabase";
 import { RootState } from "../types";
-import { AiOutlineEdit, AiOutlineUser, AiOutlineMail, AiOutlineCalendar } from "react-icons/ai";
+import {
+  AiOutlineEdit,
+  AiOutlineUser,
+  AiOutlineMail,
+  AiOutlineCalendar,
+} from "react-icons/ai";
 
 interface UserProfile {
   id: string;
@@ -40,15 +45,15 @@ const Account: React.FC = () => {
   const loadProfile = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get user profile from Supabase profiles table
       const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
         .single();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (profileError && profileError.code !== "PGRST116") {
         throw profileError;
       }
 
@@ -57,13 +62,13 @@ const Account: React.FC = () => {
         const newProfile = {
           id: user.id,
           email: user.email,
-          first_name: user.user_metadata?.first_name || '',
-          last_name: user.user_metadata?.last_name || '',
-          phone: user.user_metadata?.phone || '',
+          first_name: user.user_metadata?.first_name || "",
+          last_name: user.user_metadata?.last_name || "",
+          phone: user.user_metadata?.phone || "",
         };
 
         const { data: createdProfile, error: createError } = await supabase
-          .from('profiles')
+          .from("profiles")
           .insert([newProfile])
           .select()
           .single();
@@ -75,13 +80,15 @@ const Account: React.FC = () => {
       }
 
       setEditForm({
-        first_name: profileData?.first_name || user.user_metadata?.first_name || '',
-        last_name: profileData?.last_name || user.user_metadata?.last_name || '',
-        phone: profileData?.phone || user.user_metadata?.phone || '',
+        first_name:
+          profileData?.first_name || user.user_metadata?.first_name || "",
+        last_name:
+          profileData?.last_name || user.user_metadata?.last_name || "",
+        phone: profileData?.phone || user.user_metadata?.phone || "",
       });
     } catch (error: any) {
-      console.error('Error loading profile:', error);
-      toast.error('Failed to load profile');
+      console.error("Error loading profile:", error);
+      toast.error("Failed to load profile");
     } finally {
       setIsLoading(false);
     }
@@ -89,18 +96,18 @@ const Account: React.FC = () => {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           first_name: editForm.first_name,
           last_name: editForm.last_name,
           phone: editForm.phone,
         })
-        .eq('id', user.id)
+        .eq("id", user.id)
         .select()
         .single();
 
@@ -108,10 +115,10 @@ const Account: React.FC = () => {
 
       setProfile(data);
       setIsEditing(false);
-      toast.success('Profile updated successfully!');
+      toast.success("Profile updated successfully!");
     } catch (error: any) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +126,7 @@ const Account: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value }));
+    setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
   if (isLoading) {
@@ -159,7 +166,7 @@ const Account: React.FC = () => {
                   className="bg-white text-primary-500 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center space-x-2"
                 >
                   <AiOutlineEdit className="w-4 h-4" />
-                  <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
+                  <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
                 </button>
               </div>
             </div>
@@ -195,7 +202,7 @@ const Account: React.FC = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Phone Number
@@ -216,7 +223,7 @@ const Account: React.FC = () => {
                       disabled={isLoading}
                       className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                     >
-                      {isLoading ? 'Saving...' : 'Save Changes'}
+                      {isLoading ? "Saving..." : "Save Changes"}
                     </button>
                     <button
                       type="button"
@@ -253,14 +260,16 @@ const Account: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-500">Member Since</p>
                         <p className="font-medium">
-                          {profile?.created_at 
-                            ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })
-                            : 'N/A'
-                          }
+                          {profile?.created_at
+                            ? new Date(profile.created_at).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )
+                            : "N/A"}
                         </p>
                       </div>
                     </div>
@@ -269,11 +278,15 @@ const Account: React.FC = () => {
                   <div className="space-y-6">
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-500">Phone Number</p>
-                      <p className="font-medium">{profile?.phone || 'Not provided'}</p>
+                      <p className="font-medium">
+                        {profile?.phone || "Not provided"}
+                      </p>
                     </div>
 
                     <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
-                      <h3 className="font-semibold text-primary-800 mb-2">Account Status</h3>
+                      <h3 className="font-semibold text-primary-800 mb-2">
+                        Account Status
+                      </h3>
                       <p className="text-primary-700">✅ Active Account</p>
                       <p className="text-sm text-primary-600 mt-1">
                         Your account is in good standing
@@ -282,13 +295,13 @@ const Account: React.FC = () => {
 
                     <div className="space-y-3">
                       <button
-                        onClick={() => navigate('/order-history')}
+                        onClick={() => navigate("/order-history")}
                         className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                       >
                         View Order History
                       </button>
                       <button
-                        onClick={() => navigate('/cart')}
+                        onClick={() => navigate("/cart")}
                         className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                       >
                         View Cart

@@ -16,6 +16,8 @@ const initialState: ProductState = {
   total: 0,
   men: [],
   women: [],
+  products: [],
+  categories: [],
   isLoading: false,
   isError: false,
 };

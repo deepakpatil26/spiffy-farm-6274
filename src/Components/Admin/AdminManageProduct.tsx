@@ -44,7 +44,14 @@ const AdminManageProduct: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await productService.addProduct(product);
+      const newProduct = {
+        ...product,
+        gender: product.gender as 'men' | 'women',
+        type: product.type || '',
+        actualPrice: product.actualPrice || product.price
+      };
+      
+      await productService.addProduct(newProduct);
       toast.success("Product added successfully");
       setProduct(initialState);
     } catch (error: any) {

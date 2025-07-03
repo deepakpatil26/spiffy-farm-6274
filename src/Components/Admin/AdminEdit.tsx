@@ -61,7 +61,14 @@ const AdminEdit: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await productService.updateProduct(id, product);
+      const updatedProduct = {
+        ...product,
+        gender: product.gender as 'men' | 'women',
+        type: product.type || '',
+        actualPrice: product.actualPrice || product.price
+      };
+      
+      await productService.updateProduct(id, updatedProduct);
       toast.success("Product updated successfully");
       navigate("/products");
     } catch (error: any) {

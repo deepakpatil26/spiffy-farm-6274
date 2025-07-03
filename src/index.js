@@ -11,7 +11,10 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter>
+  <BrowserRouter future={{
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  }}>
     <ChakraProvider>
       <Provider store={store}>
         <App />

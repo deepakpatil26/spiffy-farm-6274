@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Navbar from "../Components/Home/Navbar";
+import NewNavbar from "../Components/Home/NewNavbar";
 import Footer from "../Components/Home/Footer";
 import { RootState } from "../types";
 import { loadWishlist, removeFromWishlist } from "../redux/wishlistReducer/action";
@@ -61,7 +61,7 @@ const Wishlist: React.FC = () => {
   if (isLoading) {
     return (
       <>
-        <Navbar />
+        <NewNavbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
         </div>
@@ -72,7 +72,7 @@ const Wishlist: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <NewNavbar />
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="mb-8">
