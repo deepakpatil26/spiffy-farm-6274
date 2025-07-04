@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AiOutlineClose } from "react-icons/ai";
@@ -8,6 +8,7 @@ import { signOut } from "../../redux/authReducer/action";
 import { RootState } from "../../types";
 import { toast } from 'react-toastify';
 import { useAppDispatch } from "../../redux/hooks";
+import { newProductService } from "../../services/newProductService";
 
 interface SideBarProps {
   isOpen: boolean;
@@ -18,6 +19,20 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
   const { isAuth } = useSelector((state: RootState) => state.AuthReducer);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const categoriesData = await newProductService.getCategories();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
 
   const handleLogout = () => {
     dispatch(signOut());
@@ -38,7 +53,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out">
+      <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <img src={LogoImage} alt="logo" className="h-8" />
@@ -60,7 +75,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation Links */}
-        <div className="px-4 py-2 space-y-4">
+        <div className="px-4 py-2 space-y-2">
           <Link 
             to="/" 
             onClick={handleLinkClick}
@@ -68,27 +83,19 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
           >
             Home
           </Link>
-          <Link 
-            to="/women" 
-            onClick={handleLinkClick}
-            className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
-          >
-            Women
-          </Link>
-          <Link 
-            to="/men" 
-            onClick={handleLinkClick}
-            className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
-          >
-            Men
-          </Link>
-          <Link 
-            to="#" 
-            onClick={handleLinkClick}
-            className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
-          >
-            Kids
-          </Link>
+          
+          {/* Category Links */}
+          {categories.slice(0, 5).map((category) => (
+            <Link 
+              key={category.id}
+              to={`/category/${category.slug}`} 
+              onClick={handleLinkClick}
+              className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200 capitalize"
+            >
+              {category.name}
+            </Link>
+          ))}
+          
           <Link 
             to="/cart" 
             onClick={handleLinkClick}
@@ -96,17 +103,20 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
           >
             Your Cart
           </Link>
-          <Link 
-            to="#" 
-            onClick={handleLinkClick}
-            className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
-          >
-            Profile
-          </Link>
+          
+          {isAuth && (
+            <Link 
+              to="/account" 
+              onClick={handleLinkClick}
+              className="block text-center text-lg font-medium py-3 hover:text-primary-500 hover:bg-gray-50 rounded-lg transition-all duration-200"
+            >
+              My Account
+            </Link>
+          )}
         </div>
 
         {/* Auth Button */}
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 mt-auto">
           <div className="flex justify-center">
             {isAuth ? (
               <button
