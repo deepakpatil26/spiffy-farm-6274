@@ -35,7 +35,7 @@ export interface Product {
   categorySlug?: string;
   slug?: string;
   type: string;
-  gender: 'men' | 'women';
+  gender: 'men' | 'women' | 'unisex';
   discount?: number;
   created_at?: string;
 }
