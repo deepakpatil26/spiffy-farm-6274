@@ -7,7 +7,15 @@ const supabaseAnonKey =
   process.env.REACT_APP_SUPABASE_ANON_KEY ||
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1bHRqaGRocW1tdXpydGtvcHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMzMwNzAsImV4cCI6MjA2NTcwOTA3MH0.fphhyybfNdO2hLupdAMHnmkQ2jqk4kHd-vRxZPwToww";
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Configure the auth options to persist the session in local storage
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+  },
+});
 
 // Database types
 export interface Product {
