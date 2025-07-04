@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { Product } from '../types';
+import { Product, RootState } from '../types';
 import { AiOutlineHeart, AiOutlineShoppingCart } from 'react-icons/ai';
+import { addToCart } from '../redux/cartReducer/action';
+import { useAppDispatch } from '../redux/hooks';
 
 interface NewCardProps {
   product: Product;
@@ -11,6 +14,8 @@ interface NewCardProps {
 
 const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
+  const { user } = useSelector((state: RootState) => state.AuthReducer);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -18,7 +23,12 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
     
     setIsLoading(true);
     try {
-      // TODO: Implement add to cart functionality
+      const cartItem = {
+        ...product,
+        quantity: 1,
+      };
+
+      await dispatch(addToCart(cartItem, user?.id) as any);
       toast.success('Added to cart successfully!');
     } catch (error) {
       console.error('Error adding to cart:', error);

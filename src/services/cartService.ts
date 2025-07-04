@@ -6,19 +6,18 @@ export interface SupabaseCartItem {
   quantity: number;
   created_at: string;
   updated_at: string;
-  products: {
-    id: string;
+  products_data: {
+    id: number;
     title: string;
     price: number;
-    actualPrice: number;
-    image: string;
-    img1?: string;
-    img2?: string;
-    img3?: string;
-    img4?: string;
-    category: string;
-    gender: string;
-    type: string;
+    description?: string;
+    category__name: string;
+    slug: string;
+    images__001?: string;
+    images__002?: string;
+    images__003?: string;
+    images__004?: string;
+    images__005?: string;
   };
 }
 
@@ -42,11 +41,11 @@ export const cartService = {
       if (!cartItems || cartItems.length === 0) return [];
 
       // Get all product IDs from cart items
-      const productIds = cartItems.map(item => item.product_id);
+      const productIds = cartItems.map(item => parseInt(item.product_id));
 
-      // Then fetch all products in the cart
+      // Then fetch all products in the cart from products_data table
       const { data: products, error: productsError } = await supabase
-        .from('products')
+        .from('products_data')
         .select('*')
         .in('id', productIds);
 
@@ -56,23 +55,34 @@ export const cartService = {
       const transformedItems: CartItem[] = [];
       
       for (const cartItem of cartItems) {
-        const product = products?.find(p => p.id === cartItem.product_id);
+        const product = products?.find(p => p.id === parseInt(cartItem.product_id));
         if (!product) continue; // Skip items with missing product data
         
         transformedItems.push({
-          id: cartItem.product_id,
+          id: product.id.toString(),
           cart_item_id: cartItem.id,
           title: product.title,
           price: product.price,
-          actualPrice: product.actualPrice || product.price,
-          image: product.images__001 || "",
+          actualPrice: product.price, // Use same price as actual price for now
+          image: product.images__001 || "https://placehold.co/600x400",
           img1: product.images__001,
           img2: product.images__002,
           img3: product.images__003,
           img4: product.images__004,
+          images: [
+            product.images__001,
+            product.images__002,
+            product.images__003,
+            product.images__004,
+            product.images__005
+          ].filter(Boolean),
+          description: product.description,
           category: product.category__name || "",
-          gender: product.gender || "",
-          type: product.type || "",
+          categoryId: product.category__id,
+          categorySlug: product.category__slug,
+          slug: product.slug,
+          gender: "unisex", // Default since new API doesn't have gender
+          type: "regular", // Default type
           quantity: cartItem.quantity || 1,
         });
       }
