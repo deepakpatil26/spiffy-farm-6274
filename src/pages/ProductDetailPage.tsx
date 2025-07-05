@@ -6,8 +6,9 @@ import { AiOutlineHeart, AiOutlineShoppingCart, AiOutlineArrowLeft } from 'react
 import NewNavbar from '../Components/Home/NewNavbar';
 import Footer from '../Components/Home/Footer';
 import { newProductService } from '../services/newProductService';
-import { Product, RootState } from '../types';
+import { Product, RootState, CartItem } from '../types';
 import { useAppDispatch } from '../redux/hooks';
+import { addToCart } from '../redux/cartReducer/action';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,34 +22,57 @@ const ProductDetailPage: React.FC = () => {
 
   const { user } = useSelector((state: RootState) => state.AuthReducer);
 
+  // Load product when component mounts or id changes
   useEffect(() => {
-    if (id) {
-      loadProduct(id);
-    }
-  }, [id]);
+    const loadProduct = async (productId: string) => {
+      try {
+        setIsLoading(true);
+        const productData = await newProductService.getProduct(productId);
+        setProduct(productData);
+      } catch (error: any) {
+        toast.error('Product not found');
+        navigate('/');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const loadProduct = async (productId: string) => {
-    try {
-      setIsLoading(true);
-      const productData = await newProductService.getProduct(productId);
-      setProduct(productData);
-    } catch (error: any) {
-      toast.error('Product not found');
-      navigate('/');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const loadProductData = async () => {
+      if (id) {
+        await loadProduct(id);
+      }
+    };
+    
+    loadProductData();
+  }, [id, navigate]);
 
   const handleAddToCart = async () => {
     if (!product) return;
 
     setIsAddingToCart(true);
     try {
-      // TODO: Implement add to cart functionality with new product structure
+      // Create a cart item with required fields
+      const cartItem: Omit<CartItem, 'cart_item_id'> = {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        actualPrice: product.actualPrice || product.price,
+        image: Array.isArray(product.images) && product.images.length > 0 
+          ? product.images[0] 
+          : product.image || '',
+        images: product.images || [product.image],
+        quantity: quantity,
+        category: product.category,
+        type: product.type || 'default',
+        gender: product.gender || 'unisex'
+      };
+      
+      // Dispatch the addToCart action with the cart item and user ID
+      await dispatch(addToCart(cartItem, user?.id));
       toast.success('Added to cart successfully!');
     } catch (error: any) {
-      toast.error('Failed to add to cart');
+      console.error('Add to cart error:', error);
+      toast.error(error.message || 'Failed to add to cart');
     } finally {
       setIsAddingToCart(false);
     }

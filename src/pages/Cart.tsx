@@ -211,7 +211,7 @@ export const Cart: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center p-6 border-b border-gray-200 last:border-b-0">
+                <div key={item.cart_item_id || item.id} className="flex items-center p-6 border-b border-gray-200 last:border-b-0">
                   <img 
                     src={item.image} 
                     alt={item.title} 

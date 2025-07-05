@@ -8,7 +8,7 @@ import {
   WISHLIST_REQUEST_SUCCESS,
   WISHLIST_REQUEST_FAILURE,
 } from "./actionTypes";
-import { wishlistService, WishlistItem } from '../../services/wishlistService';
+import { wishlistService } from '../../services/wishlistService';
 
 // Action to start wishlist operation
 const wishlistRequestPending = () => ({
@@ -45,14 +45,20 @@ export const loadWishlist = (userId: string) => async (dispatch: Dispatch) => {
 export const addToWishlist = (userId: string, productId: string) => async (dispatch: Dispatch) => {
   dispatch(wishlistRequestPending());
   try {
-    await wishlistService.addToWishlist(userId, productId);
+    const wishlistItem = await wishlistService.addToWishlist(userId, productId);
     
     dispatch({
       type: ADD_TO_WISHLIST,
-      payload: { userId, productId },
+      payload: {
+        ...wishlistItem,
+        product_id: productId,
+        user_id: userId,
+        created_at: wishlistItem.created_at || new Date().toISOString(),
+      },
     });
     
     dispatch(wishlistRequestSuccess());
+    return wishlistItem;
   } catch (error: any) {
     dispatch(wishlistRequestFailure(error.message));
     throw error;
@@ -67,12 +73,13 @@ export const removeFromWishlist = (userId: string, productId: string) => async (
     
     dispatch({
       type: REMOVE_FROM_WISHLIST,
-      payload: { userId, productId },
+      payload: productId,
     });
     
     dispatch(wishlistRequestSuccess());
   } catch (error: any) {
     dispatch(wishlistRequestFailure(error.message));
+    throw error;
   }
 };
 
@@ -82,9 +89,13 @@ export const clearWishlist = (userId: string) => async (dispatch: Dispatch) => {
   try {
     await wishlistService.clearWishlist(userId);
     
-    dispatch({ type: CLEAR_WISHLIST });
+    dispatch({
+      type: CLEAR_WISHLIST,
+    });
+    
     dispatch(wishlistRequestSuccess());
   } catch (error: any) {
     dispatch(wishlistRequestFailure(error.message));
+    throw error;
   }
 };

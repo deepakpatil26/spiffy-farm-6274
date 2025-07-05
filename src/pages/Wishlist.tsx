@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import NewNavbar from "../Components/Home/NewNavbar";
 import Footer from "../Components/Home/Footer";
-import { RootState } from "../types";
+import { RootState, Product } from "../types";
 import { loadWishlist, removeFromWishlist } from "../redux/wishlistReducer/action";
 import { addToCart } from "../redux/cartReducer/action";
 import { useAppDispatch } from "../redux/hooks";
@@ -35,26 +35,38 @@ const Wishlist: React.FC = () => {
     }
   };
 
-  const handleAddToCart = async (item: any) => {
+  const handleAddToCart = async (product: Product) => {
     try {
+      if (!product) {
+        throw new Error("Product not found");
+      }
       const cartItem = {
-        ...item.product,
+        ...product,
         quantity: 1,
       };
-      await dispatch(addToCart(cartItem, user.id) as any);
-      toast.success("Added to cart successfully!");
+      if (user?.id) {
+        await dispatch(addToCart(cartItem, user.id) as any);
+        toast.success("Added to cart successfully!");
+      } else {
+        throw new Error("User not authenticated");
+      }
     } catch (error: any) {
-      toast.error("Failed to add to cart");
+      console.error("Add to cart error:", error);
+      toast.error(error.message || "Failed to add to cart");
     }
   };
 
   const handleMoveToCart = async (item: any) => {
     try {
-      await handleAddToCart(item);
+      if (!item.products_data) {
+        throw new Error("Product data not available");
+      }
+      await handleAddToCart(item.products_data);
       await handleRemoveFromWishlist(item.product_id);
       toast.success("Moved to cart successfully!");
     } catch (error: any) {
-      toast.error("Failed to move to cart");
+      console.error("Move to cart error:", error);
+      toast.error(error.message || "Failed to move to cart");
     }
   };
 
@@ -114,9 +126,13 @@ const Wishlist: React.FC = () => {
                 <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden group">
                   <div className="relative">
                     <img
-                      src={item.product?.image}
-                      alt={item.product?.title}
+                      src={item.products_data?.image}
+                      alt={item.products_data?.title || 'Product image'}
                       className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://via.placeholder.com/300x400?text=Image+Not+Available';
+                      }}
                     />
                     <button
                       onClick={() => handleRemoveFromWishlist(item.product_id)}
@@ -125,22 +141,22 @@ const Wishlist: React.FC = () => {
                       <AiOutlineClose className="w-4 h-4 text-red-500" />
                     </button>
                   </div>
-                  
+
                   <div className="p-4">
                     <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                      {item.product?.title}
+                      {item.products_data?.title || 'Product Title'}
                     </h3>
                     <div className="flex items-center space-x-2 mb-4">
                       <span className="text-lg font-bold text-primary-600">
-                        ₹{item.product?.price}
+                        ₹{item.products_data?.price || 0}
                       </span>
-                      {item.product?.actualPrice && item.product.actualPrice > item.product.price && (
+                      {item.products_data?.actualPrice && item.products_data.actualPrice > (item.products_data?.price || 0) && (
                         <span className="text-sm text-gray-500 line-through">
-                          ₹{item.product.actualPrice}
+                          ₹{item.products_data.actualPrice}
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="space-y-2">
                       <button
                         onClick={() => handleMoveToCart(item)}
@@ -151,7 +167,7 @@ const Wishlist: React.FC = () => {
                       </button>
                       
                       <button
-                        onClick={() => navigate(`/${item.product?.gender}/${item.product_id}`)}
+                        onClick={() => navigate(`/${item.products_data?.gender || 'unisex'}/${item.product_id}`)}
                         className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors"
                       >
                         View Details

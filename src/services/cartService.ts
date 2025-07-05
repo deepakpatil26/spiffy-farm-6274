@@ -33,56 +33,71 @@ export const cartService = {
 
       // First, get the cart items
       const { data: cartItems, error } = await supabase
-        .from('cart_items')
-        .select('id, product_id, quantity')
-        .eq('user_id', userId);
+        .from("cart_items")
+        .select("id, product_id, quantity")
+        .eq("user_id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("[cartService] Error fetching cart items:", error);
+        throw error;
+      }
+
       if (!cartItems || cartItems.length === 0) return [];
 
       // Get all product IDs from cart items
-      const productIds = cartItems.map(item => parseInt(item.product_id));
+      const productIds = cartItems.map((item) => item.product_id);
 
       // Then fetch all products in the cart from products_data table
       const { data: products, error: productsError } = await supabase
-        .from('products_data')
-        .select('*')
-        .in('id', productIds);
+        .from("products_data")
+        .select("*")
+        .in("id", productIds);
 
-      if (productsError) throw productsError;
+      if (productsError) {
+        console.error("[cartService] Error fetching products:", productsError);
+        throw productsError;
+      }
 
       // Transform the data to match the CartItem interface
       const transformedItems: CartItem[] = [];
-      
+
       for (const cartItem of cartItems) {
-        const product = products?.find(p => p.id === parseInt(cartItem.product_id));
-        if (!product) continue; // Skip items with missing product data
-        
+        const product = products?.find((p) => p.id === cartItem.product_id);
+        if (!product) {
+          console.warn(
+            `[cartService] Product not found for cart item:`,
+            cartItem
+          );
+          continue; // Skip items with missing product data
+        }
+
+        // Get the first available image
+        const imageKeys = [
+          "images__001",
+          "images__002",
+          "images__003",
+          "images__004",
+          "images__005",
+        ];
+        const firstImage =
+          imageKeys.find((key) => product[key as keyof typeof product]) || "";
+        const image = firstImage
+          ? (product[firstImage as keyof typeof product] as string)
+          : "https://placehold.co/600x400";
+
         transformedItems.push({
           id: product.id.toString(),
           cart_item_id: cartItem.id,
-          title: product.title,
-          price: product.price,
-          actualPrice: product.price, // Use same price as actual price for now
-          image: product.images__001 || "https://placehold.co/600x400",
-          img1: product.images__001,
-          img2: product.images__002,
-          img3: product.images__003,
-          img4: product.images__004,
-          images: [
-            product.images__001,
-            product.images__002,
-            product.images__003,
-            product.images__004,
-            product.images__005
-          ].filter(Boolean),
-          description: product.description,
-          category: product.category__name || "",
-          categoryId: product.category__id,
-          categorySlug: product.category__slug,
-          slug: product.slug,
-          gender: "unisex", // Default since new API doesn't have gender
-          type: "regular", // Default type
+          title: product.title || "Unknown Product",
+          price: product.price || 0,
+          actualPrice: product.actualPrice || product.price || 0,
+          image: image,
+          images: [image],
+          description: product.description || "",
+          category: product.category || "other",
+          slug: product.slug || `product-${product.id}`,
+          gender: product.gender || "unisex",
+          type: product.type || "regular",
           quantity: cartItem.quantity || 1,
         });
       }
@@ -100,57 +115,190 @@ export const cartService = {
    */
   async addToCart(
     userId: string,
-    productId: string,
+    productId: string | number,
     quantity: number = 1
   ): Promise<CartItem[]> {
-    console.log(
-      `[cartService] addToCart - userId: ${userId}, productId: ${productId}, quantity: ${quantity}`
-    );
+    console.group("[cartService] addToCart");
+    console.log("Input:", { userId, productId, quantity });
 
     try {
-      // Check if item already exists in cart
-      const { data: existingItem, error: fetchError } = await supabase
-        .from("cart_items")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("product_id", productId)
-        .single();
+      // Convert productId to number if it's a string
+      const productIdNum =
+        typeof productId === "string" ? parseInt(productId, 10) : productId;
 
-      if (fetchError && fetchError.code !== "PGRST116") {
-        // PGRST116 is "no rows returned"
-        console.error(
-          "[cartService] Error checking for existing cart item:",
-          fetchError
-        );
-        throw fetchError;
+      if (isNaN(productIdNum)) {
+        throw new Error("Invalid product ID");
+      }
+
+      // First, verify the product exists
+      console.log("Fetching product from products_data...");
+      console.log(
+        "Product ID type:",
+        typeof productIdNum,
+        "Value:",
+        productIdNum
+      );
+
+      // First, try to get all products to see what IDs exist
+      const { data: allProducts, error: allProductsError } = await supabase
+        .from("products_data")
+        .select("id")
+        .limit(10);
+
+      console.log(
+        "First 10 product IDs in database:",
+        allProducts?.map((p) => p.id + " (" + typeof p.id + ")")
+      );
+
+      // Now try to get the specific product
+      console.log(
+        "Querying products_data for ID:",
+        productIdNum,
+        "Type:",
+        typeof productIdNum
+      );
+
+      // First try with the ID as a number
+      console.log("Querying products_data with:", {
+        table: "products_data",
+        select: "*",
+        where: { id: productIdNum, idType: typeof productIdNum },
+      });
+
+      let query = supabase
+        .from("products_data")
+        .select("*")
+        .eq("id", productIdNum);
+
+      const { data: product, error: productError } = await query.maybeSingle();
+
+      console.log("Product query result:", {
+        product: product ? { id: product.id, title: product.title } : null,
+        error: productError,
+      });
+
+      // If not found, try with the ID as a string
+      if (!product && !productError) {
+        console.log("Product not found with numeric ID, trying string ID...");
+        console.log("Trying with string ID:", String(productIdNum));
+
+        const stringQuery = supabase
+          .from("products_data")
+          .select("*")
+          .eq("id", String(productIdNum));
+
+        const { data: stringProduct, error: stringError } =
+          await stringQuery.maybeSingle();
+
+        if (stringProduct) {
+          console.log("Found product with string ID:", {
+            id: stringProduct.id,
+            title: stringProduct.title,
+            idType: typeof stringProduct.id,
+          });
+          return this.addToCart(userId, stringProduct.id, quantity);
+        }
+      }
+
+      if (productError) {
+        console.error("[cartService] Error fetching product:", productError);
+        console.groupEnd();
+        throw new Error(`Error fetching product: ${productError.message}`);
+      }
+
+      if (!product) {
+        const errorMessage = `Product with ID ${productIdNum} not found in products_data`;
+        console.error(`[cartService] ${errorMessage}`);
+        console.groupEnd();
+        throw new Error(errorMessage);
+      }
+      console.log("Product found:", { id: product.id, title: product.title });
+
+      // Check if item already exists in cart
+      console.log("Checking for existing cart item...");
+      let existingItem = null;
+      try {
+        const { data, error } = await supabase
+          .from("cart_items")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("product_id", productIdNum)
+          .maybeSingle();
+
+        if (error) {
+          console.error(
+            "[cartService] Error checking for existing cart item:",
+            error
+          );
+          throw error;
+        }
+
+        existingItem = data;
+        console.log("Existing cart item:", existingItem);
+      } catch (error) {
+        console.error("[cartService] Error in cart item lookup:", error);
+        console.groupEnd();
+        throw error;
       }
 
       if (existingItem) {
         // Update quantity if item exists
-        await supabase
+        const newQuantity = (existingItem.quantity || 1) + quantity;
+        console.log("Updating existing item. New quantity:", newQuantity);
+
+        const { error: updateError } = await supabase
           .from("cart_items")
           .update({
-            quantity: existingItem.quantity + quantity,
+            quantity: newQuantity,
             updated_at: new Date().toISOString(),
           })
           .eq("id", existingItem.id);
+
+        if (updateError) {
+          console.error("[cartService] Error updating cart item:", updateError);
+          console.groupEnd();
+          throw updateError;
+        }
       } else {
         // Add new item to cart
-        await supabase.from("cart_items").insert([
-          {
-            user_id: userId,
-            product_id: productId,
-            quantity,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ]);
+        console.log("Adding new item to cart");
+        const newCartItem = {
+          user_id: userId,
+          product_id: productIdNum, // Use the numeric product ID
+          quantity: quantity,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        console.log("Inserting cart item:", newCartItem);
+
+        const { data: newItem, error: insertError } = await supabase
+          .from("cart_items")
+          .insert([newCartItem])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error(
+            "[cartService] Error adding item to cart:",
+            insertError
+          );
+          console.groupEnd();
+          throw insertError;
+        }
+
+        console.log("[cartService] Added new cart item:", newItem);
       }
 
       // Return the updated cart
-      return this.getCartItems(userId);
+      console.log("Fetching updated cart...");
+      const updatedCart = await this.getCartItems(userId);
+      console.log("[cartService] Updated cart:", updatedCart);
+      console.groupEnd();
+      return updatedCart;
     } catch (error) {
       console.error("[cartService] Error in addToCart:", error);
+      console.groupEnd();
       throw error;
     }
   },

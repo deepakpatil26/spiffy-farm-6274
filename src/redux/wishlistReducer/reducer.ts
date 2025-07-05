@@ -7,7 +7,7 @@ import {
   WISHLIST_REQUEST_SUCCESS,
   WISHLIST_REQUEST_FAILURE,
 } from "./actionTypes";
-import { WishlistItem } from "../../services/wishlistService";
+import { WishlistItem } from "../../types";
 
 interface WishlistState {
   items: WishlistItem[];
@@ -21,13 +21,17 @@ const initialState: WishlistState = {
   error: null,
 };
 
-interface WishlistAction {
-  type: string;
-  payload?: any;
-}
+type WishlistAction =
+  | { type: typeof WISHLIST_REQUEST_PENDING }
+  | { type: typeof WISHLIST_REQUEST_SUCCESS }
+  | { type: typeof WISHLIST_REQUEST_FAILURE; payload: string }
+  | { type: typeof LOAD_WISHLIST; payload: WishlistItem[] }
+  | { type: typeof ADD_TO_WISHLIST; payload: WishlistItem }
+  | { type: typeof REMOVE_FROM_WISHLIST; payload: string }
+  | { type: typeof CLEAR_WISHLIST };
 
-export const reducer = (state = initialState, { type, payload }: WishlistAction): WishlistState => {
-  switch (type) {
+export const reducer = (state = initialState, action: WishlistAction): WishlistState => {
+  switch (action.type) {
     case WISHLIST_REQUEST_PENDING:
       return {
         ...state,
@@ -46,23 +50,37 @@ export const reducer = (state = initialState, { type, payload }: WishlistAction)
       return {
         ...state,
         isLoading: false,
-        error: payload,
+        error: action.payload,
       };
 
     case LOAD_WISHLIST:
       return {
         ...state,
-        items: payload,
+        items: action.payload || [],
+        isLoading: false,
+        error: null,
       };
 
-    case ADD_TO_WISHLIST:
-      // The actual item will be loaded when we refresh the wishlist
-      return state;
+    case ADD_TO_WISHLIST: {
+      // Check if item already exists in wishlist
+      const existingItem = state.items.some(
+        (item) => item.product_id === action.payload.product_id
+      );
+
+      if (existingItem) {
+        return state;
+      }
+
+      return {
+        ...state,
+        items: [...state.items, action.payload],
+      };
+    }
 
     case REMOVE_FROM_WISHLIST:
       return {
         ...state,
-        items: state.items.filter(item => item.product_id !== payload.productId),
+        items: state.items.filter((item) => item.product_id !== action.payload),
       };
 
     case CLEAR_WISHLIST:
