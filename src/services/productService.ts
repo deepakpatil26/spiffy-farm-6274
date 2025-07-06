@@ -15,7 +15,7 @@ export const productService = {
     const { category, page = 1, limit = 12, sortBy, sortOrder } = filters
     
     let query = supabase
-      .from('products')
+      .from('products_data')
       .select('*', { count: 'exact' })
       .eq('gender', 'men')
     
@@ -44,7 +44,7 @@ export const productService = {
     const { category, page = 1, limit = 12, sortBy, sortOrder } = filters
     
     let query = supabase
-      .from('products')
+      .from('products_data')
       .select('*', { count: 'exact' })
       .eq('gender', 'women')
     
@@ -71,7 +71,7 @@ export const productService = {
   // Get single product
   async getProduct(id: string) {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_data')
       .select('*')
       .eq('id', id)
       .single()
@@ -83,7 +83,7 @@ export const productService = {
   // Add product (admin)
   async addProduct(product: Omit<Product, 'id' | 'created_at'>) {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_data')
       .insert([product])
       .select()
       .single()
@@ -95,7 +95,7 @@ export const productService = {
   // Update product (admin)
   async updateProduct(id: string, updates: Partial<Product>) {
     const { data, error } = await supabase
-      .from('products')
+      .from('products_data')
       .update(updates)
       .eq('id', id)
       .select()
@@ -108,7 +108,7 @@ export const productService = {
   // Delete product (admin)
   async deleteProduct(id: string) {
     const { error } = await supabase
-      .from('products')
+      .from('products_data')
       .delete()
       .eq('id', id)
     
