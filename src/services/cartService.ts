@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../types";
-import { productService } from "./productService";
+import { newProductService } from "./newProductService";
 
 export interface SupabaseCartItem {
   id: string;
@@ -49,10 +49,10 @@ export const cartService = {
       const productIdSet = new Set(cartItems.map((item) => item.product_id));
       const uniqueProductIds = Array.from(productIdSet);
 
-      // Fetch all products from the local Supabase products_data table
+      // Fetch all products from the external API using newProductService
       const productPromises = uniqueProductIds.map(async (productId) => {
         try {
-          const product = await productService.getProduct(productId.toString());
+          const product = await newProductService.getProductById(productId);
           return { id: productId, product };
         } catch (error) {
           console.warn(`[cartService] Failed to fetch product ${productId}:`, error);
@@ -82,20 +82,15 @@ export const cartService = {
           continue; // Skip items with missing product data
         }
 
-        // Get the first available image from the product service format
+        // Get the first available image from the newProductService format
         let image = "https://placehold.co/600x400";
         const images: string[] = [];
         
-        if (product.image) {
-          image = product.image;
-          images.push(product.image);
+        // newProductService returns images as an array
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+          image = product.images[0];
+          images.push(...product.images);
         }
-        
-        // Add additional images if they exist
-        if (product.img1) images.push(product.img1);
-        if (product.img2) images.push(product.img2);
-        if (product.img3) images.push(product.img3);
-        if (product.img4) images.push(product.img4);
         
         // If no images found, use placeholder
         if (images.length === 0) {
@@ -107,14 +102,14 @@ export const cartService = {
           cart_item_id: cartItem.id,
           title: product.title || "Unknown Product",
           price: product.price || 0,
-          actualPrice: product.actualPrice || product.price || 0,
+          actualPrice: product.price || 0,
           image: image,
           images: images,
           description: product.description || "",
-          category: product.category || "other",
+          category: product.category?.name || "other",
           slug: product.slug || `product-${product.id}`,
-          gender: product.gender || "unisex",
-          type: product.type || "regular",
+          gender: "unisex", // Default since external API doesn't provide this
+          type: "regular", // Default since external API doesn't provide this
           quantity: cartItem.quantity || 1,
         });
       }
@@ -147,8 +142,8 @@ export const cartService = {
         throw new Error("Invalid product ID");
       }
 
-      // First, verify the product exists by fetching from local Supabase products_data table
-      console.log("Fetching product from local products_data table...");
+      // First, verify the product exists by fetching from external API using newProductService
+      console.log("Fetching product from external API...");
       console.log(
         "Product ID type:",
         typeof productIdNum,
@@ -158,10 +153,10 @@ export const cartService = {
 
       let product;
       try {
-        product = await productService.getProduct(productIdNum.toString());
+        product = await newProductService.getProductById(productIdNum);
         console.log("Product found:", { id: product.id, title: product.title });
       } catch (error) {
-        const errorMessage = `Product with ID ${productIdNum} not found in products_data table`;
+        const errorMessage = `Product with ID ${productIdNum} not found in external API`;
         console.error(`[cartService] ${errorMessage}`, error);
         console.groupEnd();
         throw new Error(errorMessage);
