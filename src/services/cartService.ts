@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../types";
-import { newProductService } from "./newProductService";
+import { productService } from "./productService";
 
 export interface SupabaseCartItem {
   id: string;
@@ -48,10 +48,10 @@ export const cartService = {
       // Get unique product IDs from cart items
       const uniqueProductIds = [...new Set(cartItems.map((item) => item.product_id))];
 
-      // Fetch all products from the external API
+      // Fetch all products from the local Supabase products_data table
       const productPromises = uniqueProductIds.map(async (productId) => {
         try {
-          const product = await newProductService.getProduct(productId.toString());
+          const product = await productService.getProduct(productId.toString());
           return { id: productId, product };
         } catch (error) {
           console.warn(`[cartService] Failed to fetch product ${productId}:`, error);
@@ -81,24 +81,39 @@ export const cartService = {
           continue; // Skip items with missing product data
         }
 
-        // Get the first available image
-        const image = product.images && product.images.length > 0 
-          ? product.images[0] 
-          : "https://placehold.co/600x400";
+        // Get the first available image from the product service format
+        let image = "https://placehold.co/600x400";
+        const images: string[] = [];
+        
+        if (product.image) {
+          image = product.image;
+          images.push(product.image);
+        }
+        
+        // Add additional images if they exist
+        if (product.img1) images.push(product.img1);
+        if (product.img2) images.push(product.img2);
+        if (product.img3) images.push(product.img3);
+        if (product.img4) images.push(product.img4);
+        
+        // If no images found, use placeholder
+        if (images.length === 0) {
+          images.push(image);
+        }
 
         transformedItems.push({
           id: product.id.toString(),
           cart_item_id: cartItem.id,
           title: product.title || "Unknown Product",
           price: product.price || 0,
-          actualPrice: product.price || 0,
+          actualPrice: product.actualPrice || product.price || 0,
           image: image,
-          images: product.images || [image],
+          images: images,
           description: product.description || "",
-          category: product.category?.name || "other",
-          slug: product.title?.toLowerCase().replace(/\s+/g, '-') || `product-${product.id}`,
-          gender: "unisex", // Default since external API doesn't provide this
-          type: "regular", // Default since external API doesn't provide this
+          category: product.category || "other",
+          slug: product.slug || `product-${product.id}`,
+          gender: product.gender || "unisex",
+          type: product.type || "regular",
           quantity: cartItem.quantity || 1,
         });
       }
@@ -131,8 +146,8 @@ export const cartService = {
         throw new Error("Invalid product ID");
       }
 
-      // First, verify the product exists by fetching from external API
-      console.log("Fetching product from external API...");
+      // First, verify the product exists by fetching from local Supabase products_data table
+      console.log("Fetching product from local products_data table...");
       console.log(
         "Product ID type:",
         typeof productIdNum,
@@ -142,10 +157,10 @@ export const cartService = {
 
       let product;
       try {
-        product = await newProductService.getProduct(productIdNum.toString());
+        product = await productService.getProduct(productIdNum.toString());
         console.log("Product found:", { id: product.id, title: product.title });
       } catch (error) {
-        const errorMessage = `Product with ID ${productIdNum} not found in external API`;
+        const errorMessage = `Product with ID ${productIdNum} not found in products_data table`;
         console.error(`[cartService] ${errorMessage}`, error);
         console.groupEnd();
         throw new Error(errorMessage);
