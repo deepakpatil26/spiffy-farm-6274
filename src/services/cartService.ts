@@ -45,8 +45,9 @@ export const cartService = {
 
       if (!cartItems || cartItems.length === 0) return [];
 
-      // Get unique product IDs from cart items
-      const uniqueProductIds = [...new Set(cartItems.map((item) => item.product_id))];
+      // Get unique product IDs from cart items using Array.from instead of spread operator
+      const productIdSet = new Set(cartItems.map((item) => item.product_id));
+      const uniqueProductIds = Array.from(productIdSet);
 
       // Fetch all products from the local Supabase products_data table
       const productPromises = uniqueProductIds.map(async (productId) => {
