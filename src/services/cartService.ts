@@ -52,7 +52,7 @@ export const cartService = {
       // Fetch all products from the external API using newProductService
       const productPromises = uniqueProductIds.map(async (productId) => {
         try {
-          const product = await newProductService.getProductById(productId);
+          const product = await newProductService.getProduct(productId.toString());
           return { id: productId, product };
         } catch (error) {
           console.warn(`[cartService] Failed to fetch product ${productId}:`, error);
@@ -106,7 +106,7 @@ export const cartService = {
           image: image,
           images: images,
           description: product.description || "",
-          category: product.category?.name || "other",
+          category: product.category || "other",
           slug: product.slug || `product-${product.id}`,
           gender: "unisex", // Default since external API doesn't provide this
           type: "regular", // Default since external API doesn't provide this
@@ -153,7 +153,7 @@ export const cartService = {
 
       let product;
       try {
-        product = await newProductService.getProductById(productIdNum);
+        product = await newProductService.getProduct(productIdNum.toString());
         console.log("Product found:", { id: product.id, title: product.title });
       } catch (error) {
         const errorMessage = `Product with ID ${productIdNum} not found in external API`;
