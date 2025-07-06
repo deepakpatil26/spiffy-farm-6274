@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../types";
+import { newProductService } from "./newProductService";
 
 export interface SupabaseCartItem {
   id: string;
@@ -44,25 +45,34 @@ export const cartService = {
 
       if (!cartItems || cartItems.length === 0) return [];
 
-      // Get all product IDs from cart items
-      const productIds = cartItems.map((item) => item.product_id);
+      // Get unique product IDs from cart items
+      const uniqueProductIds = [...new Set(cartItems.map((item) => item.product_id))];
 
-      // Then fetch all products in the cart from products_data table
-      const { data: products, error: productsError } = await supabase
-        .from("products_data")
-        .select("*")
-        .in("id", productIds);
+      // Fetch all products from the external API
+      const productPromises = uniqueProductIds.map(async (productId) => {
+        try {
+          const product = await newProductService.getProduct(productId.toString());
+          return { id: productId, product };
+        } catch (error) {
+          console.warn(`[cartService] Failed to fetch product ${productId}:`, error);
+          return { id: productId, product: null };
+        }
+      });
 
-      if (productsError) {
-        console.error("[cartService] Error fetching products:", productsError);
-        throw productsError;
-      }
+      const productResults = await Promise.all(productPromises);
+      const productsMap = new Map();
+      
+      productResults.forEach(({ id, product }) => {
+        if (product) {
+          productsMap.set(id, product);
+        }
+      });
 
       // Transform the data to match the CartItem interface
       const transformedItems: CartItem[] = [];
 
       for (const cartItem of cartItems) {
-        const product = products?.find((p) => p.id === cartItem.product_id);
+        const product = productsMap.get(cartItem.product_id);
         if (!product) {
           console.warn(
             `[cartService] Product not found for cart item:`,
@@ -72,17 +82,8 @@ export const cartService = {
         }
 
         // Get the first available image
-        const imageKeys = [
-          "images__001",
-          "images__002",
-          "images__003",
-          "images__004",
-          "images__005",
-        ];
-        const firstImage =
-          imageKeys.find((key) => product[key as keyof typeof product]) || "";
-        const image = firstImage
-          ? (product[firstImage as keyof typeof product] as string)
+        const image = product.images && product.images.length > 0 
+          ? product.images[0] 
           : "https://placehold.co/600x400";
 
         transformedItems.push({
@@ -90,14 +91,14 @@ export const cartService = {
           cart_item_id: cartItem.id,
           title: product.title || "Unknown Product",
           price: product.price || 0,
-          actualPrice: product.actualPrice || product.price || 0,
+          actualPrice: product.price || 0,
           image: image,
-          images: [image],
+          images: product.images || [image],
           description: product.description || "",
-          category: product.category || "other",
-          slug: product.slug || `product-${product.id}`,
-          gender: product.gender || "unisex",
-          type: product.type || "regular",
+          category: product.category?.name || "other",
+          slug: product.title?.toLowerCase().replace(/\s+/g, '-') || `product-${product.id}`,
+          gender: "unisex", // Default since external API doesn't provide this
+          type: "regular", // Default since external API doesn't provide this
           quantity: cartItem.quantity || 1,
         });
       }
@@ -130,8 +131,8 @@ export const cartService = {
         throw new Error("Invalid product ID");
       }
 
-      // First, verify the product exists
-      console.log("Fetching product from products_data...");
+      // First, verify the product exists by fetching from external API
+      console.log("Fetching product from external API...");
       console.log(
         "Product ID type:",
         typeof productIdNum,
@@ -139,80 +140,23 @@ export const cartService = {
         productIdNum
       );
 
-      // First, try to get all products to see what IDs exist
-      const { data: allProducts, error: allProductsError } = await supabase
-        .from("products_data")
-        .select("id")
-        .limit(10);
-
-      console.log(
-        "First 10 product IDs in database:",
-        allProducts?.map((p) => p.id + " (" + typeof p.id + ")")
-      );
-
-      // Now try to get the specific product
-      console.log(
-        "Querying products_data for ID:",
-        productIdNum,
-        "Type:",
-        typeof productIdNum
-      );
-
-      // First try with the ID as a number
-      console.log("Querying products_data with:", {
-        table: "products_data",
-        select: "*",
-        where: { id: productIdNum, idType: typeof productIdNum },
-      });
-
-      let query = supabase
-        .from("products_data")
-        .select("*")
-        .eq("id", productIdNum);
-
-      const { data: product, error: productError } = await query.maybeSingle();
-
-      console.log("Product query result:", {
-        product: product ? { id: product.id, title: product.title } : null,
-        error: productError,
-      });
-
-      // If not found, try with the ID as a string
-      if (!product && !productError) {
-        console.log("Product not found with numeric ID, trying string ID...");
-        console.log("Trying with string ID:", String(productIdNum));
-
-        const stringQuery = supabase
-          .from("products_data")
-          .select("*")
-          .eq("id", String(productIdNum));
-
-        const { data: stringProduct, error: stringError } =
-          await stringQuery.maybeSingle();
-
-        if (stringProduct) {
-          console.log("Found product with string ID:", {
-            id: stringProduct.id,
-            title: stringProduct.title,
-            idType: typeof stringProduct.id,
-          });
-          return this.addToCart(userId, stringProduct.id, quantity);
-        }
-      }
-
-      if (productError) {
-        console.error("[cartService] Error fetching product:", productError);
+      let product;
+      try {
+        product = await newProductService.getProduct(productIdNum.toString());
+        console.log("Product found:", { id: product.id, title: product.title });
+      } catch (error) {
+        const errorMessage = `Product with ID ${productIdNum} not found in external API`;
+        console.error(`[cartService] ${errorMessage}`, error);
         console.groupEnd();
-        throw new Error(`Error fetching product: ${productError.message}`);
+        throw new Error(errorMessage);
       }
 
       if (!product) {
-        const errorMessage = `Product with ID ${productIdNum} not found in products_data`;
+        const errorMessage = `Product with ID ${productIdNum} not found`;
         console.error(`[cartService] ${errorMessage}`);
         console.groupEnd();
         throw new Error(errorMessage);
       }
-      console.log("Product found:", { id: product.id, title: product.title });
 
       // Check if item already exists in cart
       console.log("Checking for existing cart item...");
