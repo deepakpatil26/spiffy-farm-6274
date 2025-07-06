@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { Product } from '../lib/supabase'
+import { toBackendId, toFrontendId } from '../utils/idMapper'
 
 export interface ProductFilters {
   category?: string[]
@@ -18,6 +19,11 @@ export const productService = {
       .from('products_data')
       .select('*', { count: 'exact' })
       .eq('gender', 'men')
+      
+    // Apply pagination
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    query = query.range(from, to)
     
     if (category && category.length > 0) {
       query = query.in('category', category)
@@ -26,11 +32,6 @@ export const productService = {
     if (sortBy && sortOrder) {
       query = query.order(sortBy, { ascending: sortOrder === 'asc' })
     }
-    
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    
-    query = query.range(from, to)
     
     const { data, error, count } = await query
     
@@ -47,6 +48,11 @@ export const productService = {
       .from('products_data')
       .select('*', { count: 'exact' })
       .eq('gender', 'women')
+      
+    // Apply pagination
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+    query = query.range(from, to)
     
     if (category && category.length > 0) {
       query = query.in('category', category)
@@ -55,11 +61,6 @@ export const productService = {
     if (sortBy && sortOrder) {
       query = query.order(sortBy, { ascending: sortOrder === 'asc' })
     }
-    
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    
-    query = query.range(from, to)
     
     const { data, error, count } = await query
     
@@ -70,14 +71,23 @@ export const productService = {
 
   // Get single product
   async getProduct(id: string) {
+    const backendId = toBackendId(id)
     const { data, error } = await supabase
       .from('products_data')
       .select('*')
-      .eq('id', id)
+      .eq('id', backendId)
       .single()
-    
+
     if (error) throw error
-    return data
+    
+    // Convert the ID back to frontend format
+    if (data) {
+      return {
+        ...data,
+        id: toFrontendId(data.id).toString()
+      }
+    }
+    return null
   },
 
   // Add product (admin)

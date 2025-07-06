@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { CartItem } from "../types";
-import { newProductService } from "./newProductService";
+import { productService } from "./productService";
+import { toBackendId, toFrontendId } from "../utils/idMapper";
 
 export interface SupabaseCartItem {
   id: string;
@@ -49,14 +50,16 @@ export const cartService = {
       const productIdSet = new Set(cartItems.map((item) => item.product_id));
       const uniqueProductIds = Array.from(productIdSet);
 
-      // Fetch all products from the external API using newProductService
-      const productPromises = uniqueProductIds.map(async (productId) => {
+      // Fetch all products from the database using productService
+      const productPromises = uniqueProductIds.map(async (backendProductId) => {
         try {
-          const product = await newProductService.getProduct(productId.toString());
-          return { id: productId, product };
+          // Convert backend ID to frontend ID for the service
+          const frontendId = toFrontendId(backendProductId);
+          const product = await productService.getProduct(frontendId.toString());
+          return { id: backendProductId, product };
         } catch (error) {
-          console.warn(`[cartService] Failed to fetch product ${productId}:`, error);
-          return { id: productId, product: null };
+          console.warn(`[cartService] Failed to fetch product ${backendProductId}:`, error);
+          return { id: backendProductId, product: null };
         }
       });
 
@@ -82,11 +85,11 @@ export const cartService = {
           continue; // Skip items with missing product data
         }
 
-        // Get the first available image from the newProductService format
+        // Get the first available image from the productService format
         let image = "https://placehold.co/600x400";
         const images: string[] = [];
         
-        // newProductService returns images as an array
+        // productService returns images as an array
         if (product.images && Array.isArray(product.images) && product.images.length > 0) {
           image = product.images[0];
           images.push(...product.images);
@@ -134,29 +137,29 @@ export const cartService = {
     console.log("Input:", { userId, productId, quantity });
 
     try {
-      // Convert productId to number if it's a string
-      const productIdNum =
-        typeof productId === "string" ? parseInt(productId, 10) : productId;
+      // Convert productId to number if it's a string and validate
+      const productIdNum = typeof productId === "string" ? parseInt(productId, 10) : productId;
+      const backendProductId = toBackendId(productIdNum);
 
-      if (isNaN(productIdNum)) {
+      if (isNaN(productIdNum) || isNaN(backendProductId)) {
         throw new Error("Invalid product ID");
       }
 
-      // First, verify the product exists by fetching from external API using newProductService
-      console.log("Fetching product from external API...");
-      console.log(
-        "Product ID type:",
-        typeof productIdNum,
-        "Value:",
-        productIdNum
-      );
+      // Verify the product exists in our database
+      console.log("Fetching product from database...");
+      console.log("Frontend Product ID:", productId, "Backend ID:", backendProductId);
 
       let product;
       try {
-        product = await newProductService.getProduct(productIdNum.toString());
-        console.log("Product found:", { id: product.id, title: product.title });
+        // Get product using the frontend ID (service will handle the conversion)
+        const result = await productService.getProduct(productId.toString());
+        if (!result) {
+          throw new Error(`Product with ID ${productId} (backend ID: ${backendProductId}) not found in database`);
+        }
+        product = result;
+        console.log("Product found in database:", { frontendId: product.id, backendId: backendProductId, title: product.title });
       } catch (error) {
-        const errorMessage = `Product with ID ${productIdNum} not found in external API`;
+        const errorMessage = `Product with ID ${productId} not found in database`;
         console.error(`[cartService] ${errorMessage}`, error);
         console.groupEnd();
         throw new Error(errorMessage);
@@ -177,7 +180,7 @@ export const cartService = {
           .from("cart_items")
           .select("*")
           .eq("user_id", userId)
-          .eq("product_id", productIdNum)
+          .eq("product_id", backendProductId)
           .maybeSingle();
 
         if (error) {
@@ -219,7 +222,7 @@ export const cartService = {
         console.log("Adding new item to cart");
         const newCartItem = {
           user_id: userId,
-          product_id: productIdNum, // Use the numeric product ID
+          product_id: backendProductId, // Use the backend product ID
           quantity: quantity,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
