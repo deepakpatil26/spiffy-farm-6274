@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { Product, RootState } from '../types';
 import { AiOutlineHeart, AiOutlineShoppingCart } from 'react-icons/ai';
 import { addToCart } from '../redux/cartReducer/action';
+import { addToWishlist } from '../redux/wishlistReducer/action';
 import { useAppDispatch } from '../redux/hooks';
 
 interface NewCardProps {
@@ -14,8 +15,9 @@ interface NewCardProps {
 
 const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState<boolean>(false);
   const dispatch = useAppDispatch();
-  const { user } = useSelector((state: RootState) => state.AuthReducer);
+  const { user, isAuth } = useSelector((state: RootState) => state.AuthReducer);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,12 +44,29 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
     e.preventDefault();
     e.stopPropagation();
     
+    if (!isAuth) {
+      toast.error('Please sign in to add items to wishlist');
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error('User not found. Please sign in again.');
+      return;
+    }
+    
+    setIsAddingToWishlist(true);
     try {
-      // TODO: Implement add to wishlist functionality
-      toast.success('Added to wishlist!');
-    } catch (error) {
+      await dispatch(addToWishlist(user.id, product.id) as any);
+      toast.success('Added to wishlist successfully!');
+    } catch (error: any) {
       console.error('Error adding to wishlist:', error);
-      toast.error('Failed to add to wishlist');
+      if (error.message?.includes('already in wishlist')) {
+        toast.info('Item is already in your wishlist');
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
+    } finally {
+      setIsAddingToWishlist(false);
     }
   };
 
@@ -86,7 +105,8 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
         <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button 
             onClick={handleAddToWishlist}
-            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+            disabled={isAddingToWishlist}
+            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             <AiOutlineHeart className="w-4 h-4 text-gray-600" />
           </button>

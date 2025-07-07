@@ -12,14 +12,25 @@ export interface WishlistItem {
 export const wishlistService = {
   // Get wishlist items for user with product details
   async getWishlistItems(userId: string): Promise<WishlistItem[]> {
+    console.log(`[wishlistService] Getting wishlist items for user: ${userId}`);
+    
     // First get the wishlist items
     const { data: wishlistItems, error: wishlistError } = await supabase
       .from('wishlist_items')
       .select('*')
       .eq('user_id', userId);
     
-    if (wishlistError) throw wishlistError;
-    if (!wishlistItems?.length) return [];
+    if (wishlistError) {
+      console.error('[wishlistService] Error fetching wishlist items:', wishlistError);
+      throw wishlistError;
+    }
+    
+    if (!wishlistItems?.length) {
+      console.log('[wishlistService] No wishlist items found');
+      return [];
+    }
+
+    console.log(`[wishlistService] Found ${wishlistItems.length} wishlist items`);
 
     // Get all product IDs
     const productIds = wishlistItems.map(item => item.product_id);
@@ -30,19 +41,28 @@ export const wishlistService = {
       .select('*')
       .in('id', productIds);
     
-    if (productsError) throw productsError;
+    if (productsError) {
+      console.error('[wishlistService] Error fetching products:', productsError);
+      throw productsError;
+    }
+
+    console.log(`[wishlistService] Found ${products?.length || 0} products for wishlist items`);
 
     // Combine the data
-    return wishlistItems.map(item => ({
+    const result = wishlistItems.map(item => ({
       ...item,
-      products_data: products?.find(p => p.id === item.product_id)
+      products_data: products?.find(p => p.id.toString() === item.product_id.toString())
     }));
+
+    console.log('[wishlistService] Returning combined wishlist data:', result);
+    return result;
   },
 
   // Add item to wishlist
   async addToWishlist(userId: string, productId: string) {
-    // First check if product exists
-    // Fetch the complete product data
+    console.log(`[wishlistService] Adding product ${productId} to wishlist for user ${userId}`);
+    
+    // First check if product exists in products_data table
     const { data: product, error: productError } = await supabase
       .from('products_data')
       .select('*')
@@ -50,21 +70,11 @@ export const wishlistService = {
       .single();
     
     if (productError || !product) {
+      console.error('[wishlistService] Product not found:', productError);
       throw new Error('Product not found');
     }
     
-    // Ensure we have all required Product fields
-    const completeProduct: Product = {
-      id: product.id,
-      title: product.title || 'Unknown Product',
-      price: product.price || 0,
-      actualPrice: product.actualPrice || product.price || 0,
-      image: product.image || '',
-      category: product.category || 'other',
-      type: product.type || 'other',
-      gender: product.gender || 'unisex',
-      ...product // Spread the rest of the product properties
-    };
+    console.log('[wishlistService] Product found:', product.title);
 
     // Check if item already exists in wishlist
     const { data: existingItem } = await supabase
@@ -75,9 +85,11 @@ export const wishlistService = {
       .single();
     
     if (existingItem) {
+      console.log('[wishlistService] Item already in wishlist');
       throw new Error('Item already in wishlist');
     }
 
+    // Add to wishlist
     const { data, error } = await supabase
       .from('wishlist_items')
       .insert([{ 
@@ -88,25 +100,56 @@ export const wishlistService = {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('[wishlistService] Error adding to wishlist:', error);
+      throw error;
+    }
+    
+    console.log('[wishlistService] Successfully added to wishlist:', data);
     
     // Return the wishlist item with complete product data
     const wishlistItem: WishlistItem = {
       ...data,
-      products_data: completeProduct
+      products_data: {
+        id: product.id.toString(),
+        title: product.title || 'Unknown Product',
+        price: product.price || 0,
+        actualPrice: product.actualPrice || product.price || 0,
+        image: product.images__001 || product.image || '',
+        images: [
+          product.images__001,
+          product.images__002,
+          product.images__003,
+          product.images__004,
+          product.images__005
+        ].filter(Boolean),
+        description: product.description || '',
+        category: product.category__name || 'other',
+        slug: product.slug || `product-${product.id}`,
+        type: 'regular',
+        gender: 'unisex'
+      }
     };
+    
     return wishlistItem;
   },
 
   // Remove item from wishlist
   async removeFromWishlist(userId: string, productId: string) {
+    console.log(`[wishlistService] Removing product ${productId} from wishlist for user ${userId}`);
+    
     const { error } = await supabase
       .from('wishlist_items')
       .delete()
       .eq('user_id', userId)
       .eq('product_id', productId)
     
-    if (error) throw error
+    if (error) {
+      console.error('[wishlistService] Error removing from wishlist:', error);
+      throw error;
+    }
+    
+    console.log('[wishlistService] Successfully removed from wishlist');
   },
 
   // Check if item is in wishlist
@@ -124,11 +167,18 @@ export const wishlistService = {
 
   // Clear wishlist
   async clearWishlist(userId: string) {
+    console.log(`[wishlistService] Clearing wishlist for user ${userId}`);
+    
     const { error } = await supabase
       .from('wishlist_items')
       .delete()
       .eq('user_id', userId);
     
-    if (error) throw error;
+    if (error) {
+      console.error('[wishlistService] Error clearing wishlist:', error);
+      throw error;
+    }
+    
+    console.log('[wishlistService] Successfully cleared wishlist');
   }
 }

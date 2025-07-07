@@ -9,6 +9,7 @@ import { newProductService } from '../services/newProductService';
 import { Product, RootState, CartItem } from '../types';
 import { useAppDispatch } from '../redux/hooks';
 import { addToCart } from '../redux/cartReducer/action';
+import { addToWishlist } from '../redux/wishlistReducer/action';
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,9 +19,10 @@ const ProductDetailPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const { user } = useSelector((state: RootState) => state.AuthReducer);
+  const { user, isAuth } = useSelector((state: RootState) => state.AuthReducer);
 
   // Load product when component mounts or id changes
   useEffect(() => {
@@ -81,11 +83,29 @@ const ProductDetailPage: React.FC = () => {
   const handleAddToWishlist = async () => {
     if (!product) return;
 
+    if (!isAuth) {
+      toast.error('Please sign in to add items to wishlist');
+      return;
+    }
+
+    if (!user?.id) {
+      toast.error('User not found. Please sign in again.');
+      return;
+    }
+
+    setIsAddingToWishlist(true);
     try {
-      // TODO: Implement add to wishlist functionality
-      toast.success('Added to wishlist!');
+      await dispatch(addToWishlist(user.id, product.id) as any);
+      toast.success('Added to wishlist successfully!');
     } catch (error: any) {
-      toast.error('Failed to add to wishlist');
+      console.error('Error adding to wishlist:', error);
+      if (error.message?.includes('already in wishlist')) {
+        toast.info('Item is already in your wishlist');
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
+    } finally {
+      setIsAddingToWishlist(false);
     }
   };
 
@@ -248,10 +268,11 @@ const ProductDetailPage: React.FC = () => {
 
                 <button
                   onClick={handleAddToWishlist}
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                  disabled={isAddingToWishlist}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   <AiOutlineHeart className="w-5 h-5" />
-                  <span>Add to Wishlist</span>
+                  <span>{isAddingToWishlist ? 'Adding to Wishlist...' : 'Add to Wishlist'}</span>
                 </button>
               </div>
 
