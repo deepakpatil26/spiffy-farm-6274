@@ -16,7 +16,7 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ isOpen, onClose }) => {
-  const { isAuth, user } = useSelector((state: RootState) => state.AuthReducer);
+  const { isAuth } = useSelector((state: RootState) => state.AuthReducer);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [categories, setCategories] = useState<any[]>([]);

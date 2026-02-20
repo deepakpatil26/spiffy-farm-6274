@@ -13,7 +13,7 @@ const CategoryPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,33 +24,27 @@ const CategoryPage: React.FC = () => {
     max: searchParams.get('price_max') || ''
   });
 
-  useEffect(() => {
-    if (slug) {
-      loadCategoryData();
-    }
-  }, [slug, searchParams]);
-
-  const loadCategoryData = async () => {
+  const loadCategoryData = React.useCallback(async () => {
     if (!slug) return;
-    
+
     try {
       setIsLoading(true);
-      
+
       // Get category info
       const categories = await newProductService.getCategories();
       const categoryData = categories.find(cat => cat.slug === slug);
-      
+
       if (!categoryData) {
         toast.error('Category not found');
         navigate('/');
         return;
       }
-      
+
       setCategory(categoryData);
-      
+
       // Get products for this category
       const { data } = await newProductService.getProductsByCategorySlug(slug, 50);
-      
+
       // Apply sorting
       let sortedProducts = [...data];
       if (sortBy === 'price_asc') {
@@ -60,7 +54,7 @@ const CategoryPage: React.FC = () => {
       } else if (sortBy === 'name') {
         sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
       }
-      
+
       // Apply price filter
       if (priceRange.min || priceRange.max) {
         sortedProducts = sortedProducts.filter(product => {
@@ -70,7 +64,7 @@ const CategoryPage: React.FC = () => {
           return price >= min && price <= max;
         });
       }
-      
+
       setProducts(sortedProducts);
     } catch (error) {
       console.error('Error loading category data:', error);
@@ -78,7 +72,13 @@ const CategoryPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [slug, navigate, sortBy, priceRange]);
+
+  useEffect(() => {
+    if (slug) {
+      loadCategoryData();
+    }
+  }, [slug, searchParams, loadCategoryData]);
 
   const handleSortChange = (newSort: string) => {
     setSortBy(newSort);
@@ -248,11 +248,10 @@ const CategoryPage: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className={`grid gap-6 ${
-                  viewMode === 'grid' 
-                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                <div className={`grid gap-6 ${viewMode === 'grid'
+                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
                     : 'grid-cols-1'
-                }`}>
+                  }`}>
                   {products.map((product) => (
                     <NewCard key={product.id} product={product} />
                   ))}

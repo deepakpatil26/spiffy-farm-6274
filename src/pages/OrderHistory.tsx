@@ -33,6 +33,27 @@ const OrderHistory: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
 
+  const loadOrders = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setOrders(data || []);
+    } catch (error: any) {
+      console.error('Error loading orders:', error);
+      toast.error('Failed to load order history');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user.id]);
+
   useEffect(() => {
     if (!isAuth || !user?.id) {
       if (!isAuth) navigate("/login");
@@ -60,78 +81,7 @@ const OrderHistory: React.FC = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [isAuth, navigate, user?.id]);
-
-  // Realistic Order Status Simulation Effect
-  useEffect(() => {
-    if (orders.length === 0) return;
-
-    const timers: NodeJS.Timeout[] = [];
-    const DELAY_MS = 240000; // 4 minutes for simulation
-
-    orders.forEach(order => {
-      if (order.status.toLowerCase() === 'pending') {
-        const orderTime = new Date(order.created_at).getTime();
-        const currentTime = new Date().getTime();
-        const elapsed = currentTime - orderTime;
-        const remaining = DELAY_MS - elapsed;
-
-        const updateStatus = async (orderId: string) => {
-          try {
-            const { error } = await supabase
-              .from('orders')
-              .update({ status: 'delivered' })
-              .eq('id', orderId);
-
-            if (error) throw error;
-
-            toast.success(`Order #${orderId.slice(-8).toUpperCase()} has been delivered!`, {
-              position: "top-right",
-              autoClose: 5000,
-            });
-
-            loadOrders(); // Refresh orders
-          } catch (err) {
-            console.error('Error auto-updating order status:', err);
-          }
-        };
-
-        if (remaining <= 0) {
-          // Update immediately if time has already passed
-          updateStatus(order.id);
-        } else {
-          // Schedule update
-          const timer = setTimeout(() => {
-            updateStatus(order.id);
-          }, remaining);
-          timers.push(timer);
-        }
-      }
-    });
-
-    return () => timers.forEach(clearTimeout);
-  }, [orders.length]); // Run when order count changes
-
-  const loadOrders = async () => {
-    try {
-      setIsLoading(true);
-
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setOrders(data || []);
-    } catch (error: any) {
-      console.error('Error loading orders:', error);
-      toast.error('Failed to load order history');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [isAuth, navigate, user?.id, loadOrders]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {

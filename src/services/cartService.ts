@@ -232,7 +232,7 @@ export const cartService = {
           updated_at: new Date().toISOString(),
         };
 
-        const { data: newItem, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from('cart_items')
           .insert([newCartItem])
           .select()

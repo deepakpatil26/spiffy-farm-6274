@@ -5,7 +5,7 @@ import AdminSidebar from "../Components/Admin/AdminSidebar";
 import { RootState } from "../types";
 
 const Admin: React.FC = () => {
-  const { afterLoginUser, isAdmin } = useSelector((state: RootState) => state.AuthReducer);
+  const { afterLoginUser } = useSelector((state: RootState) => state.AuthReducer);
 
   return (
     <div className="min-h-screen bg-gray-50">

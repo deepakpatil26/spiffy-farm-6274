@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { getwomens } from "../redux/MenReducer/action";
 import Card from "../Components/Card";
@@ -16,20 +16,20 @@ export const Women: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { women, isLoading, isError, total } = useSelector((store: RootState) => store.MenReducer);
+  const { women, isLoading, isError } = useSelector((store: RootState) => store.MenReducer);
 
-  const queryParams = {
+  const queryParams = React.useMemo(() => ({
     params: {
       category: searchParams.getAll("category"),
       _page: searchParams.get("page"),
       _sort: searchParams.get("order") ? "price" : null,
       _order: searchParams.get("order"),
     },
-  };
+  }), [searchParams]);
 
   useEffect(() => {
     dispatch(getwomens(queryParams));
-  }, [location.search, dispatch]);
+  }, [location.search, dispatch, queryParams]);
 
   if (isLoading) {
     return (
@@ -55,7 +55,7 @@ export const Women: React.FC = () => {
                 <h3 className="text-red-800 font-medium">Error!</h3>
                 <p className="text-red-700">
                   Something went wrong while loading the products.
-                  <button 
+                  <button
                     className="ml-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
                     onClick={() => dispatch(getwomens(queryParams))}
                   >
@@ -74,7 +74,7 @@ export const Women: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       {/* Promotional Banner */}
       <div className="relative bg-gradient-to-r from-pink-500 to-purple-600 h-12 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 animate-pulse"></div>

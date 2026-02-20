@@ -99,7 +99,6 @@ export const wishlistService = {
   async addToWishlist(userId: string, productId: string) {
     // Handling Mock Admin User
     if (userId === 'admin-super-user-id') {
-      const backendProductId = toBackendId(parseInt(productId));
       // Return a mock result to satisfy the Promise return type
       return {
         id: 'mock-wishlist-item-id',

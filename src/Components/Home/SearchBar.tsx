@@ -22,6 +22,19 @@ const SearchBar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const performSearch = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await newProductService.searchProducts(searchTerm, 5);
+      setSearchResults(data);
+      setIsDropdownOpen(true);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchTerm]);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm.trim().length > 1) {
@@ -33,20 +46,7 @@ const SearchBar: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
-
-  const performSearch = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await newProductService.searchProducts(searchTerm, 5);
-      setSearchResults(data);
-      setIsDropdownOpen(true);
-    } catch (error) {
-      console.error("Search error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [searchTerm, performSearch]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

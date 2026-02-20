@@ -9,7 +9,7 @@ import {
   GET_USER,
   SIGNUP_RESET,
 } from './actionTypes';
-import { AuthState, User, AuthUser } from '../../types';
+import { AuthState, AuthUser } from '../../types';
 
 const initialState: AuthState = {
   createAccountLoading: false,

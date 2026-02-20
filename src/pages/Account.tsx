@@ -34,15 +34,7 @@ const Account: React.FC = () => {
     phone: "",
   });
 
-  useEffect(() => {
-    if (!isAuth) {
-      navigate("/login");
-      return;
-    }
-    loadProfile();
-  }, [isAuth, navigate]);
-
-  const loadProfile = async () => {
+  const loadProfile = React.useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -92,7 +84,15 @@ const Account: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!isAuth) {
+      navigate("/login");
+      return;
+    }
+    loadProfile();
+  }, [isAuth, navigate, loadProfile]);
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
