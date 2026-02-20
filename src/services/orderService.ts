@@ -1,19 +1,19 @@
-import { supabase } from '../lib/supabase'
-import { CartItem } from '../types'
+import { supabase } from '../lib/supabase';
+import { CartItem } from '../types';
 
 export interface OrderItem {
-  id: string
-  title: string
-  price: number
-  quantity: number
-  image: string
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
 }
 
 export interface CreateOrderData {
-  user_id: string
-  total: number
-  status: string
-  items: OrderItem[]
+  user_id: string;
+  total: number;
+  status: string;
+  items: OrderItem[];
 }
 
 export const orderService = {
@@ -23,10 +23,10 @@ export const orderService = {
       .from('orders')
       .insert([orderData])
       .select()
-      .single()
-    
-    if (error) throw error
-    return data
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
   // Get orders for a user
@@ -35,10 +35,10 @@ export const orderService = {
       .from('orders')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    return data || []
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   },
 
   // Get a specific order
@@ -47,10 +47,10 @@ export const orderService = {
       .from('orders')
       .select('*')
       .eq('id', orderId)
-      .single()
-    
-    if (error) throw error
-    return data
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
   // Update order status
@@ -60,20 +60,20 @@ export const orderService = {
       .update({ status })
       .eq('id', orderId)
       .select()
-      .single()
-    
-    if (error) throw error
-    return data
+      .single();
+
+    if (error) throw error;
+    return data;
   },
 
   // Convert cart items to order items
   convertCartToOrderItems(cartItems: CartItem[]): OrderItem[] {
-    return cartItems.map(item => ({
+    return cartItems.map((item) => ({
       id: item.id,
       title: item.title,
       price: item.price,
       quantity: item.quantity,
-      image: item.image
-    }))
-  }
-}
+      image: item.image,
+    }));
+  },
+};

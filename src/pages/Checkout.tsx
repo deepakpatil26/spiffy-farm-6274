@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import Navbar from "../Components/Home/Navbar";
+import NewNavbar from "../Components/Home/NewNavbar";
 import Footer from "../Components/Home/Footer";
 import { RootState, Address } from "../types";
 
@@ -118,7 +118,7 @@ const Checkout: React.FC = () => {
   if (!cartItems.length) {
     return (
       <>
-        <Navbar />
+        <NewNavbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-gray-600 mb-4">Cart is Empty!</h2>
@@ -138,10 +138,10 @@ const Checkout: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <NewNavbar />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout & Shipping</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Address Form */}
           <div className="lg:col-span-2">
@@ -152,7 +152,7 @@ const Checkout: React.FC = () => {
               </div>
 
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Add your Address</h3>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -164,9 +164,8 @@ const Checkout: React.FC = () => {
                       name="name"
                       value={address.name}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your name"
                     />
                     {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -182,9 +181,8 @@ const Checkout: React.FC = () => {
                       value={address.mobile}
                       onChange={handleChange}
                       maxLength={10}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.mobile ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.mobile ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="+91 Enter mobile no"
                     />
                     {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
@@ -202,9 +200,8 @@ const Checkout: React.FC = () => {
                       value={address.pin}
                       onChange={handleChange}
                       maxLength={6}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.pin ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.pin ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your pincode"
                     />
                     {errors.pin && <p className="text-red-500 text-xs mt-1">{errors.pin}</p>}
@@ -219,9 +216,8 @@ const Checkout: React.FC = () => {
                       name="city"
                       value={address.city}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.city ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.city ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your city"
                     />
                     {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
@@ -238,9 +234,8 @@ const Checkout: React.FC = () => {
                       name="state"
                       value={address.state}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.state ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.state ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter your state"
                     />
                     {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
@@ -255,9 +250,8 @@ const Checkout: React.FC = () => {
                       name="building"
                       value={address.building}
                       onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        errors.building ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${errors.building ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Enter building details"
                     />
                     {errors.building && <p className="text-red-500 text-xs mt-1">{errors.building}</p>}
@@ -298,25 +292,25 @@ const Checkout: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
-              
+
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
                   <span>Total MRP</span>
                   <span className="font-semibold">₹{getTotalPrice()}</span>
                 </div>
-                
+
                 <div className="flex justify-between text-green-600">
                   <span>Discount</span>
                   <span className="font-semibold">- ₹{calculateSavings()}</span>
                 </div>
-                
+
                 <div className="flex justify-between text-green-600">
                   <span>Shipping</span>
                   <span className="font-semibold">FREE</span>
                 </div>
-                
+
                 <hr />
-                
+
                 <div className="flex justify-between text-lg font-bold">
                   <span>Grand Total</span>
                   <span>₹{getTotalPrice() - calculateSavings()}</span>

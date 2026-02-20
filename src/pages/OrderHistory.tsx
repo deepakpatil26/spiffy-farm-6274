@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Navbar from "../Components/Home/Navbar";
+import NewNavbar from "../Components/Home/NewNavbar";
 import Footer from "../Components/Home/Footer";
 import { supabase } from "../lib/supabase";
 import { RootState } from "../types";
@@ -34,12 +34,12 @@ const OrderHistory: React.FC = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   useEffect(() => {
-    if (!isAuth) {
-      navigate("/login");
+    if (!isAuth || !user?.id) {
+      if (!isAuth) navigate("/login");
       return;
     }
     loadOrders();
-    
+
     // Set up real-time subscription
     const subscription = supabase
       .channel('orders_changes')
@@ -51,8 +51,7 @@ const OrderHistory: React.FC = () => {
           table: 'orders',
           filter: `user_id=eq.${user.id}`
         },
-        (payload) => {
-          console.log('Order change received:', payload);
+        () => {
           loadOrders(); // Reload orders when changes occur
         }
       )
@@ -63,10 +62,60 @@ const OrderHistory: React.FC = () => {
     };
   }, [isAuth, navigate, user?.id]);
 
+  // Realistic Order Status Simulation Effect
+  useEffect(() => {
+    if (orders.length === 0) return;
+
+    const timers: NodeJS.Timeout[] = [];
+    const DELAY_MS = 240000; // 4 minutes for simulation
+
+    orders.forEach(order => {
+      if (order.status.toLowerCase() === 'pending') {
+        const orderTime = new Date(order.created_at).getTime();
+        const currentTime = new Date().getTime();
+        const elapsed = currentTime - orderTime;
+        const remaining = DELAY_MS - elapsed;
+
+        const updateStatus = async (orderId: string) => {
+          try {
+            const { error } = await supabase
+              .from('orders')
+              .update({ status: 'delivered' })
+              .eq('id', orderId);
+
+            if (error) throw error;
+
+            toast.success(`Order #${orderId.slice(-8).toUpperCase()} has been delivered!`, {
+              position: "top-right",
+              autoClose: 5000,
+            });
+
+            loadOrders(); // Refresh orders
+          } catch (err) {
+            console.error('Error auto-updating order status:', err);
+          }
+        };
+
+        if (remaining <= 0) {
+          // Update immediately if time has already passed
+          updateStatus(order.id);
+        } else {
+          // Schedule update
+          const timer = setTimeout(() => {
+            updateStatus(order.id);
+          }, remaining);
+          timers.push(timer);
+        }
+      }
+    });
+
+    return () => timers.forEach(clearTimeout);
+  }, [orders.length]); // Run when order count changes
+
   const loadOrders = async () => {
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase
         .from('orders')
         .select('*')
@@ -109,7 +158,7 @@ const OrderHistory: React.FC = () => {
   if (isLoading) {
     return (
       <>
-        <Navbar />
+        <NewNavbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
         </div>
@@ -120,7 +169,7 @@ const OrderHistory: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <NewNavbar />
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="mb-8">

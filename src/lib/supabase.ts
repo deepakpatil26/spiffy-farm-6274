@@ -1,11 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl =
   process.env.REACT_APP_SUPABASE_URL ||
-  "https://fultjhdhqmmuzrtkopyp.supabase.co";
+  'https://butgdlroubygbwncfvht.supabase.co';
 const supabaseAnonKey =
   process.env.REACT_APP_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1bHRqaGRocW1tdXpydGtvcHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMzMwNzAsImV4cCI6MjA2NTcwOTA3MH0.fphhyybfNdO2hLupdAMHnmkQ2jqk4kHd-vRxZPwToww";
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1dGdkbHJvdWJ5Z2J3bmNmdmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzA5MjcsImV4cCI6MjA4NjkwNjkyN30.SeRmpP2N6jPV5-mkqe-_UQ5ocfTK3uHFfYMm2_DXQWk';
 
 // Configure the auth options to persist the session in local storage
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -29,7 +29,7 @@ export interface Product {
   img3?: string;
   img4?: string;
   category: string;
-  gender: "men" | "women";
+  gender: 'men' | 'women';
   type: string;
   discount?: number;
   created_at?: string;

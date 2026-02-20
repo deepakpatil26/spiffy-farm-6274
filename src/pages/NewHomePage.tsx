@@ -8,6 +8,7 @@ import { newProductService } from "../services/newProductService";
 import { Product, Category } from "../types";
 import { AiOutlineArrowRight } from "react-icons/ai";
 import { toast } from "react-toastify";
+import ScrollToTop from "../Components/Common/ScrollToTop";
 
 const NewHomePage: React.FC = () => {
   const [products, setProducts] = useState<{
@@ -16,12 +17,14 @@ const NewHomePage: React.FC = () => {
     electronics: Product[];
     furniture: Product[];
     shoes: Product[];
+    miscellaneous: Product[];
   }>({
     featured: [],
     clothes: [],
     electronics: [],
     furniture: [],
     shoes: [],
+    miscellaneous: [],
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +36,7 @@ const NewHomePage: React.FC = () => {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      
+
       const [productsData, categoriesData] = await Promise.all([
         newProductService.getProductsForHomepage(),
         newProductService.getCategories()
@@ -49,8 +52,8 @@ const NewHomePage: React.FC = () => {
     }
   };
 
-  const CategoryCard: React.FC<{ 
-    category: Category; 
+  const CategoryCard: React.FC<{
+    category: Category;
     description: string;
   }> = ({ category, description }) => (
     <Link to={`/category/${category.slug}`} className="group block">
@@ -90,14 +93,14 @@ const NewHomePage: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
             <p className="text-gray-600">{subtitle}</p>
           </div>
-          <Link 
-            to={viewAllLink} 
+          <Link
+            to={viewAllLink}
             className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
           >
             View All <AiOutlineArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        
+
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
@@ -132,141 +135,148 @@ const NewHomePage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <NewNavbar />
-      
-      {/* Promotional Banner */}
-      <div className="relative bg-gradient-to-r from-primary-500 to-secondary-500 h-12 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500 animate-pulse"></div>
-        <p className="relative text-white text-sm md:text-base font-medium text-center px-4">
-          🎉 Discover amazing products across all categories! Free shipping on orders above ₹999
-        </p>
-      </div>
 
-      {/* Hero Slider */}
-      <HomeSlider />
+      {/* Main Content Area with appropriate top padding for sticky navbar */}
+      <main className="relative">
+        {/* Hero Slider Section */}
+        <section className="bg-white py-4 md:py-8 overflow-hidden">
+          <HomeSlider />
+        </section>
 
-      {/* Categories Section */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Shop by Category</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Explore our diverse collection of products across multiple categories
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.slice(0, 6).map((category) => (
-            <CategoryCard
-              key={category.id}
-              category={category}
-              description={categoryDescriptions[category.slug] || 'Discover amazing products'}
-            />
-          ))}
-        </div>
-      </section>
+        {/* Categories Section */}
+        <section className="max-w-7xl mx-auto px-4 py-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Shop by Category</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Explore our diverse collection of products across multiple categories
+            </p>
+          </div>
 
-      {/* Featured Products */}
-      <ProductSection
-        title="Featured Products"
-        subtitle="Handpicked favorites just for you"
-        products={products.featured}
-        viewAllLink="/products"
-      />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.slice(0, 6).map((category) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                description={categoryDescriptions[category.slug] || 'Discover amazing products'}
+              />
+            ))}
+          </div>
+        </section>
 
-      {/* Clothes Section */}
-      <ProductSection
-        title="Fashion & Clothing"
-        subtitle="Latest trends and timeless classics"
-        products={products.clothes}
-        viewAllLink="/category/clothes"
-        bgColor="bg-gray-50"
-      />
+        {/* Featured Products */}
+        <ProductSection
+          title="Featured Products"
+          subtitle="Handpicked favorites just for you"
+          products={products.featured}
+          viewAllLink="/products"
+        />
 
-      {/* Electronics Section */}
-      <ProductSection
-        title="Electronics & Gadgets"
-        subtitle="Cutting-edge technology at your fingertips"
-        products={products.electronics}
-        viewAllLink="/category/electronics"
-      />
+        {/* Clothes Section */}
+        <ProductSection
+          title="Fashion & Clothing"
+          subtitle="Latest trends and timeless classics"
+          products={products.clothes}
+          viewAllLink="/category/clothes"
+          bgColor="bg-gray-50"
+        />
 
-      {/* Furniture Section */}
-      <ProductSection
-        title="Furniture & Home"
-        subtitle="Transform your living space"
-        products={products.furniture}
-        viewAllLink="/category/furniture"
-        bgColor="bg-gray-50"
-      />
+        {/* Electronics Section */}
+        <ProductSection
+          title="Electronics & Gadgets"
+          subtitle="Cutting-edge technology at your fingertips"
+          products={products.electronics}
+          viewAllLink="/category/electronics"
+        />
 
-      {/* Shoes Section */}
-      <ProductSection
-        title="Footwear Collection"
-        subtitle="Step out in style and comfort"
-        products={products.shoes}
-        viewAllLink="/category/shoes"
-      />
+        {/* Furniture Section */}
+        <ProductSection
+          title="Furniture & Home"
+          subtitle="Transform your living space"
+          products={products.furniture}
+          viewAllLink="/category/furniture"
+          bgColor="bg-gray-50"
+        />
 
-      {/* Benefits Section */}
-      <section className="bg-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Why Shop With Us?</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+        {/* Shoes Section */}
+        <ProductSection
+          title="Footwear Collection"
+          subtitle="Step out in style and comfort"
+          products={products.shoes}
+          viewAllLink="/category/shoes"
+        />
+
+        {/* Miscellaneous Section */}
+        <ProductSection
+          title="Unique Finds"
+          subtitle="Special items just for you"
+          products={products.miscellaneous}
+          viewAllLink="/category/miscellaneous"
+          bgColor="bg-gray-50"
+        />
+
+        {/* Benefits Section */}
+        <section className="bg-gray-100 py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Why Shop With Us?</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Free Shipping</h3>
+                <p className="text-gray-600">Free shipping on all orders above ₹999. Fast and reliable delivery.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Free Shipping</h3>
-              <p className="text-gray-600">Free shipping on all orders above ₹999. Fast and reliable delivery.</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Quality Guarantee</h3>
+                <p className="text-gray-600">Premium quality products with 100% satisfaction guarantee.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Quality Guarantee</h3>
-              <p className="text-gray-600">Premium quality products with 100% satisfaction guarantee.</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                </svg>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy Returns</h3>
+                <p className="text-gray-600">30-day hassle-free returns and exchanges for your peace of mind.</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy Returns</h3>
-              <p className="text-gray-600">30-day hassle-free returns and exchanges for your peace of mind.</p>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Newsletter Section */}
-      <section className="bg-primary-600 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
-          <p className="text-primary-100 mb-8 text-lg">
-            Subscribe to our newsletter and be the first to know about new arrivals, exclusive offers, and special deals.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <button className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Subscribe
-            </button>
+        {/* Newsletter Section */}
+        <section className="bg-primary-600 py-12">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
+            <p className="text-primary-100 mb-8 text-lg">
+              Subscribe to our newsletter and be the first to know about new arrivals, exclusive offers, and special deals.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-4 py-3 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-white"
+              />
+              <button className="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Subscribe
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
+      <ScrollToTop />
     </div>
   );
 };

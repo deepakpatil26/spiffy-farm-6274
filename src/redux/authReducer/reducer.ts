@@ -7,8 +7,9 @@ import {
   SIGNIN_SUCCESS,
   SIGNOUT,
   GET_USER,
-} from "./actionTypes";
-import { AuthState, User, AuthUser } from "../../types";
+  SIGNUP_RESET,
+} from './actionTypes';
+import { AuthState, User, AuthUser } from '../../types';
 
 const initialState: AuthState = {
   createAccountLoading: false,
@@ -30,15 +31,18 @@ interface AuthAction {
 }
 
 // Admin email list - you can expand this or move to environment variables
-const ADMIN_EMAILS = ['deepakpatil2612@gmail.com'];
+const ADMIN_EMAILS = ['deepakpatil2612@gmail.com', 'admin@gmail.com'];
 
 const checkIsAdmin = (email: string): boolean => {
   return ADMIN_EMAILS.includes(email.toLowerCase());
 };
 
-export const reducer = (state = initialState, action: AuthAction): AuthState => {
+export const reducer = (
+  state = initialState,
+  action: AuthAction,
+): AuthState => {
   const { type, payload } = action;
-  
+
   switch (type) {
     case SIGNUP_REQUEST:
       return {
@@ -63,6 +67,14 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         createError: true,
       };
 
+    case SIGNUP_RESET:
+      return {
+        ...state,
+        successCreate: false,
+        createError: false,
+        createAccountLoading: false,
+      };
+
     case SIGNIN_REQUEST:
       return {
         ...state,
@@ -73,7 +85,7 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
     case SIGNIN_SUCCESS:
       const userEmail = payload.user?.email || '';
       const isAdmin = checkIsAdmin(userEmail);
-      
+
       return {
         ...state,
         isLoading: false,
@@ -83,7 +95,10 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         isAdmin: isAdmin,
         afterLoginUser: {
           email: userEmail,
-          name: payload.user?.user_metadata?.first_name || payload.user?.email?.split('@')[0] || '',
+          name:
+            payload.user?.user_metadata?.first_name ||
+            payload.user?.email?.split('@')[0] ||
+            '',
           password: '',
         },
         isError: false,
@@ -99,23 +114,23 @@ export const reducer = (state = initialState, action: AuthAction): AuthState => 
         session: null,
         isAdmin: false,
       };
-      
+
     case SIGNOUT:
       return {
         ...initialState, // Reset to initial state to clear cart and other data
       };
-      
+
     case GET_USER:
       const getUserEmail = payload?.email || '';
       const getUserIsAdmin = checkIsAdmin(getUserEmail);
-      
+
       return {
         ...state,
         user: payload,
         isAuth: !!payload,
         isAdmin: getUserIsAdmin,
       };
-      
+
     default:
       return state;
   }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { BsBag, BsPerson } from "react-icons/bs";
-import { AiOutlineHeart, AiOutlineMenu, AiOutlineDown } from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineMenu, AiOutlineDown, AiOutlineUser, AiOutlineShopping, AiOutlineSetting, AiOutlineLogout } from "react-icons/ai";
 import Logo from "../../Asssets/logo2.png";
 import SearchBar from "./SearchBar";
 import SideBar from "./Sidebar";
@@ -21,7 +21,7 @@ const NewNavbar: React.FC = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
-  
+
   const { isAuth, afterLoginUser, isAdmin, user } = useSelector((state: RootState) => state.AuthReducer);
   const { cartItems = [] } = useSelector((state: RootState) => state.cartReducer);
   const { items: wishlistItems = [] } = useSelector((state: RootState) => state.wishlistReducer);
@@ -50,211 +50,168 @@ const NewNavbar: React.FC = () => {
     navigate('/');
   };
 
-  const handleMouseEnter = (menu: string) => {
-    setActiveDropdown(menu);
-  };
-
-  const handleMouseLeave = () => {
-    setActiveDropdown(null);
-  };
-
-  const getCategoryProducts = (categoryName: string) => {
-    // Define some sample subcategories for each main category
-    const subcategories: { [key: string]: string[] } = {
-      'Clothes': ['T-Shirts', 'Hoodies', 'Jeans', 'Shorts', 'Jackets', 'Sweaters'],
-      'Electronics': ['Laptops', 'Headphones', 'Smartphones', 'Gaming', 'Accessories'],
-      'Furniture': ['Chairs', 'Tables', 'Sofas', 'Desks', 'Storage', 'Lighting'],
-      'Shoes': ['Sneakers', 'Boots', 'Sandals', 'Formal', 'Athletic', 'Casual'],
-      'Miscellaneous': ['Bags', 'Accessories', 'Home & Garden', 'Sports', 'Beauty']
+  const getSubcategories = (categoryName: string) => {
+    const sub: { [key: string]: string[] } = {
+      'Clothes': ['T-Shirts', 'Jeans', 'Jackets', 'New Collection'],
+      'Electronics': ['Gadgets', 'Laptops', 'Headphones', 'Smart Home'],
+      'Furniture': ['Living Room', 'Office', 'Decor', 'Kitchen'],
+      'Shoes': ['Sneakers', 'Formal', 'Casual', 'Sport'],
+      'Miscellaneous': ['Accessories', 'Gifts', 'Lifestyle']
     };
-    
-    return subcategories[categoryName] || [];
+    return sub[categoryName] || ['New Arrivals', 'Trending'];
   };
 
   return (
-    <div className="sticky top-0 z-50 bg-white shadow-sm">
-      {/* Main Navbar */}
-      <div className="flex items-center justify-between px-4 md:px-12 py-3 max-w-7xl mx-auto">
-        {/* Mobile Menu Button */}
-        <button 
-          className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
-          onClick={() => setShowMobileMenu(true)}
-        >
-          <AiOutlineMenu className="w-6 h-6" />
-        </button>
+    <div className="sticky top-0 z-[100] w-full">
+      {/* Top Professional Banner - Single One */}
+      <div className="bg-primary-600 text-white text-[10px] md:text-xs py-2 text-center font-bold tracking-[0.15em] uppercase shadow-sm">
+        FREE EXPRESS DELIVERY ON ALL ORDERS ABOVE ₹999 | SHOP NOW 🛍️
+      </div>
 
-        {/* Logo */}
-        <Link to="/" className="flex-shrink-0">
-          <img
-            src={Logo}
-            alt="logo"
-            className="h-8 md:h-12 w-auto"
-          />
-        </Link>
+      <nav className="bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20 gap-4">
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-8">
-          {categories.slice(0, 5).map((category) => (
-            <div 
-              key={category.id}
-              className="relative group"
-              onMouseEnter={() => handleMouseEnter(category.slug)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <Link 
-                to={`/category/${category.slug}`} 
-                className="flex items-center text-gray-700 hover:text-primary-500 font-medium py-4 transition-colors duration-200"
+            {/* Left: Mobile Menu & Logo */}
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+              <button
+                className="lg:hidden p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setShowMobileMenu(true)}
               >
-                {category.name}
-                <AiOutlineDown className="ml-1 w-3 h-3" />
+                <AiOutlineMenu className="w-6 h-6 text-gray-700" />
+              </button>
+              <Link to="/" className="flex-shrink-0">
+                <img src={Logo} alt="logo" className="h-8 md:h-10 lg:h-12 w-auto object-contain" />
               </Link>
-              
-              {activeDropdown === category.slug && (
-                <div className="absolute top-full left-0 w-64 bg-white shadow-lg border-t-2 border-primary-500 z-50 p-4">
-                  <div className="grid grid-cols-1 gap-2">
-                    {getCategoryProducts(category.name).map((subcategory, index) => (
-                      <Link
-                        key={index}
-                        to={`/category/${category.slug}?subcategory=${subcategory.toLowerCase()}`}
-                        className="block px-3 py-2 text-sm text-gray-600 hover:text-primary-500 hover:bg-gray-50 rounded transition-colors"
-                      >
-                        {subcategory}
-                      </Link>
-                    ))}
-                    <Link
-                      to={`/category/${category.slug}`}
-                      className="block px-3 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 border-t mt-2 pt-3"
-                    >
-                      View All {category.name}
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
-          ))}
-        </div>
 
-        {/* Search Bar */}
-        <div className="hidden lg:block flex-1 max-w-md mx-8">
-          <SearchBar />
-        </div>
+            {/* Middle: Desktop Categories */}
+            <div className="hidden lg:flex items-center space-x-1 h-full">
+              {categories.slice(0, 5).map((category) => (
+                <div
+                  key={category.id}
+                  className="relative h-20 flex items-center group"
+                  onMouseEnter={() => setActiveDropdown(category.slug)}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <Link
+                    to={`/category/${category.slug}`}
+                    className="px-3 xl:px-4 text-xs xl:text-sm font-bold text-gray-700 hover:text-primary-600 uppercase tracking-widest transition-colors h-full flex items-center"
+                  >
+                    <span>{category.name}</span>
+                    <AiOutlineDown className="ml-1.5 w-3 h-3 group-hover:rotate-180 transition-transform duration-300" />
+                  </Link>
 
-        {/* User Actions */}
-        <div className="flex items-center space-x-4">
-          {/* User Menu */}
-          <div className="relative">
-            <button 
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              onClick={() => setShowUserMenu(!showUserMenu)}
-            >
-              <BsPerson className="w-5 h-5" />
-            </button>
-            
-            {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
-                <div className="py-1">
-                  <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                    Hey, {isAuth ? afterLoginUser.name : "User"}
-                    {isAdmin && (
-                      <span className="block text-xs text-primary-600 font-medium">Admin</span>
-                    )}
-                  </div>
-                  <Link 
-                    to="/account" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    My Account
-                  </Link>
-                  <Link 
-                    to="/order-history" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setShowUserMenu(false)}
-                  >
-                    Order History
-                  </Link>
-                  {isAuth && (
-                    <Link 
-                      to="/wishlist" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      My Wishlist
-                    </Link>
-                  )}
-                  {isAdmin && (
-                    <Link 
-                      to="/admin" 
-                      className="block px-4 py-2 text-sm text-primary-600 hover:bg-primary-50 font-medium"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Admin Panel
-                    </Link>
-                  )}
-                  {!isAuth && (
-                    <Link 
-                      to="/adminLogin" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Admin Login
-                    </Link>
-                  )}
-                  {isAuth ? (
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign Out
-                    </button>
-                  ) : (
-                    <Link
-                      to="/signup"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setShowUserMenu(false)}
-                    >
-                      Sign Up
-                    </Link>
+                  {activeDropdown === category.slug && (
+                    <div className="absolute top-full left-0 w-56 bg-white shadow-2xl border border-gray-100 rounded-b-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="p-3 space-y-1">
+                        {getSubcategories(category.name).map((sub, idx) => (
+                          <Link
+                            key={idx}
+                            to={`/category/${category.slug}`}
+                            className="block px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition-colors"
+                          >
+                            {sub}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
+              ))}
+            </div>
+
+            {/* Right Middle: Search Bar (Desktop) */}
+            <div className="hidden lg:block flex-1 max-w-md">
+              <SearchBar />
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1 md:gap-4">
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  className="p-2 hover:bg-gray-50 rounded-full transition-colors group"
+                  onMouseEnter={() => setShowUserMenu(true)}
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                >
+                  <BsPerson className="w-5 h-5 text-gray-700 group-hover:text-primary-600" />
+                </button>
+
+                {showUserMenu && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-[110] animate-in fade-in slide-in-from-top-1"
+                    onMouseLeave={() => setShowUserMenu(false)}
+                  >
+                    <div className="p-4 border-b border-gray-50">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Account</p>
+                      <p className="text-sm font-bold text-gray-900 truncate">{isAuth ? afterLoginUser.name : "Guest"}</p>
+                    </div>
+                    <div className="p-2">
+                      {isAdmin && (
+                        <Link to="/admin" className="flex items-center space-x-3 px-3 py-2 text-sm font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors mb-1">
+                          <AiOutlineSetting className="w-4 h-4" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
+                      <Link to="/account" className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                        <AiOutlineUser className="w-4 h-4" />
+                        <span>Profile</span>
+                      </Link>
+                      <Link to="/order-history" className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                        <AiOutlineShopping className="w-4 h-4" />
+                        <span>Orders</span>
+                      </Link>
+                      <Link to="/wishlist" className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                        <AiOutlineHeart className="w-4 h-4" />
+                        <span>Wishlist</span>
+                      </Link>
+                      {isAuth ? (
+                        <button onClick={handleLogout} className="flex items-center space-x-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-bold mt-2">
+                          <AiOutlineLogout className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      ) : (
+                        <Link to="/login" className="block w-full mt-2 px-3 py-2 bg-primary-600 text-white text-center text-sm font-bold rounded-lg hover:bg-primary-700 transition-colors">
+                          Login
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Wishlist */}
+              <Link to="/wishlist" className="p-2 hover:bg-gray-50 rounded-full transition-colors group hidden sm:flex items-center justify-center relative">
+                <AiOutlineHeart className="w-5 h-5 text-gray-700 group-hover:text-red-500" />
+                {wishlistItems.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full h-3.5 w-3.5 flex items-center justify-center">
+                    {wishlistItems.length}
+                  </span>
+                )}
+              </Link>
+
+              {/* Cart */}
+              <Link to="/cart" className="p-2 hover:bg-gray-50 rounded-full transition-colors group flex items-center justify-center relative">
+                <BsBag className="w-5 h-5 text-gray-700 group-hover:text-primary-600" />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-primary-600 text-white text-[8px] font-bold rounded-full h-3.5 w-3.5 flex items-center justify-center">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Link>
+            </div>
           </div>
 
-          {/* Wishlist */}
-          <Link to="/wishlist" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <AiOutlineHeart className="w-5 h-5" />
-            {isAuth && wishlistItems.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {wishlistItems.length}
-              </span>
-            )}
-          </Link>
-
-          {/* Cart */}
-          <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <BsBag className="w-5 h-5" />
-            {cartItems.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-secondary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {cartItems.length}
-              </span>
-            )}
-          </Link>
+          {/* Mobile Search - Only on screens smaller than LG */}
+          <div className="lg:hidden pb-4">
+            <SearchBar />
+          </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Mobile Search */}
-      <div className="lg:hidden px-4 pb-3">
-        <SearchBar />
-      </div>
-
-      {/* Mobile Sidebar */}
-      {showMobileMenu && (
-        <SideBar 
-          isOpen={showMobileMenu} 
-          onClose={() => setShowMobileMenu(false)} 
-        />
-      )}
+      {/* Sidebar (Mobile Menu) */}
+      <SideBar isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
     </div>
   );
 };

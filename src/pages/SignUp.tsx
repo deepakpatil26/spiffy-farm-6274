@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { signUp } from "../redux/authReducer/action";
+import { signUp, cleanupSignup } from "../redux/authReducer/action";
 import { RootState } from "../types";
 import { toast } from 'react-toastify';
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -14,11 +14,16 @@ const Signup: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const { successCreate, createError } = useSelector((state: RootState) => state.AuthReducer);
+
+  useEffect(() => {
+    // Reset signup state when component mounts
+    dispatch(cleanupSignup() as any);
+  }, [dispatch]);
 
   useEffect(() => {
     if (successCreate) {
@@ -37,7 +42,7 @@ const Signup: React.FC = () => {
 
   const SignupRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !firstName || !lastName || !password) {
       toast.error("Please fill all fields");
       return;

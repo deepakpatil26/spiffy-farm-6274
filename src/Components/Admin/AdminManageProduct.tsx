@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import AdminNavbar from "./AdminNavbar";
 import AdminSidebar from "./AdminSidebar";
-import { productService } from "../../services/productService";
+import { newProductService } from "../../services/newProductService";
 import { Product } from "../../types";
 
 const initialState: Omit<Product, 'id' | 'created_at'> = {
@@ -28,15 +28,15 @@ const AdminManageProduct: React.FC = () => {
     const { name, value } = e.target;
     setProduct((prev) => ({
       ...prev,
-      [name]: name === 'price' || name === 'actualPrice' || name === 'discount' 
-        ? Number(value) 
+      [name]: name === 'price' || name === 'actualPrice' || name === 'discount'
+        ? Number(value)
         : value
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!product.title || !product.image || !product.price || !product.category) {
       toast.error("Please fill all required fields");
       return;
@@ -50,8 +50,8 @@ const AdminManageProduct: React.FC = () => {
         type: product.type || '',
         actualPrice: product.actualPrice || product.price
       };
-      
-      await productService.addProduct(newProduct);
+
+      await newProductService.addProduct(newProduct);
       toast.success("Product added successfully");
       setProduct(initialState);
     } catch (error: any) {
@@ -66,9 +66,9 @@ const AdminManageProduct: React.FC = () => {
       <AdminNavbar />
       <AdminSidebar />
       <div className="ml-64 pt-16 p-8">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Add New Product</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -79,7 +79,8 @@ const AdminManageProduct: React.FC = () => {
                 name="image"
                 value={product.image}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="https://example.com/image.jpg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-shadow"
                 required
               />
             </div>
@@ -143,28 +144,34 @@ const AdminManageProduct: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Price *
                 </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={product.price}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                  min="0"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    name="price"
+                    value={product.price}
+                    onChange={handleChange}
+                    className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                    min="0"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Actual Price
                 </label>
-                <input
-                  type="number"
-                  name="actualPrice"
-                  value={product.actualPrice}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  min="0"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    name="actualPrice"
+                    value={product.actualPrice}
+                    onChange={handleChange}
+                    className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    min="0"
+                  />
+                </div>
               </div>
             </div>
 
@@ -177,6 +184,7 @@ const AdminManageProduct: React.FC = () => {
                 name="title"
                 value={product.title}
                 onChange={handleChange}
+                placeholder="e.g. Premium Leather Jacket"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 required
               />
@@ -196,32 +204,35 @@ const AdminManageProduct: React.FC = () => {
                 >
                   <option value="men">Men</option>
                   <option value="women">Women</option>
+                  <option value="unisex">Unisex</option>
+                  <option value="kids">Kids</option>
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category *
                 </label>
-                <select
+                <input
+                  type="text"
                   name="category"
                   value={product.category}
                   onChange={handleChange}
+                  placeholder="e.g. Shoes, Electronics, Furniture"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   required
-                >
-                  <option value="">Select Category</option>
-                  {product.gender === "women" ? (
-                    <>
-                      <option value="Kurtas and Kurtis">Kurtas and Kurtis</option>
-                      <option value="Dresses and Jumpsuits">Dresses and Jumpsuits</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="Casual Shirts">Casual Shirts</option>
-                      <option value="Jeans">Jeans</option>
-                    </>
-                  )}
-                </select>
+                  list="category-suggestions"
+                />
+                <datalist id="category-suggestions">
+                  <option value="Clothes" />
+                  <option value="Electronics" />
+                  <option value="Furniture" />
+                  <option value="Shoes" />
+                  <option value="Miscellaneous" />
+                  <option value="Casual Shirts" />
+                  <option value="Jeans" />
+                  <option value="T-Shirts" />
+                  <option value="Kurtas" />
+                </datalist>
               </div>
             </div>
 
@@ -235,6 +246,7 @@ const AdminManageProduct: React.FC = () => {
                   name="type"
                   value={product.type}
                   onChange={handleChange}
+                  placeholder="e.g. regular, sale, new"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
@@ -257,7 +269,7 @@ const AdminManageProduct: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors disabled:opacity-50"
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white py-3 px-4 rounded-lg font-bold shadow-md transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
             >
               {isLoading ? "Adding Product..." : "Add Product"}
             </button>

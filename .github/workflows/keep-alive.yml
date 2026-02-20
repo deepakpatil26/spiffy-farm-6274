@@ -1,0 +1,12 @@
+name: Keep Supabase Alive
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: curl -sL https://butgdlroubygbwncfvht.supabase.co > /dev/null

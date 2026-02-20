@@ -22,7 +22,7 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setIsLoading(true);
     try {
       const cartItem = {
@@ -43,7 +43,7 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
   const handleAddToWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isAuth) {
       toast.error('Please sign in to add items to wishlist');
       return;
@@ -53,7 +53,7 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
       toast.error('User not found. Please sign in again.');
       return;
     }
-    
+
     setIsAddingToWishlist(true);
     try {
       await dispatch(addToWishlist(user.id, product.id) as any);
@@ -100,22 +100,22 @@ const NewCard: React.FC<NewCardProps> = ({ product, showAddToCart = true }) => {
           <p className="text-xs text-gray-500 capitalize">{product.category}</p>
         </div>
       </Link>
-      
+
       {showAddToCart && (
-        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button 
+        <div className="absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-300 lg:opacity-0 lg:group-hover:opacity-100">
+          <button
             onClick={handleAddToWishlist}
             disabled={isAddingToWishlist}
-            className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="p-2.5 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors disabled:opacity-50 border border-gray-100"
           >
-            <AiOutlineHeart className="w-4 h-4 text-gray-600" />
+            <AiOutlineHeart className="w-5 h-5 text-gray-700" />
           </button>
-          <button 
+          <button
             onClick={handleAddToCart}
             disabled={isLoading}
-            className="p-2 bg-primary-500 text-white rounded-full shadow-md hover:bg-primary-600 transition-colors disabled:opacity-50"
+            className="p-2.5 bg-primary-500 text-white rounded-full shadow-lg hover:bg-primary-600 transition-colors disabled:opacity-50"
           >
-            <AiOutlineShoppingCart className="w-4 h-4" />
+            <AiOutlineShoppingCart className="w-5 h-5" />
           </button>
         </div>
       )}

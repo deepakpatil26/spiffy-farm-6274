@@ -1,4 +1,4 @@
-const ID_OFFSET = 151; // Since your database IDs start from 152
+const ID_OFFSET = 0; // Reset to 0 for the fresh database
 
 export const toBackendId = (frontendId: number | string): number => {
   return Number(frontendId) + ID_OFFSET;

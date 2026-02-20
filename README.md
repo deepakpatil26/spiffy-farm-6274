@@ -19,30 +19,25 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 ### ✨ Key Features
 
 - 🔐 **Secure Authentication**:
-
   - Robust Login/Signup with comprehensive validation
   - Protecting user data with cutting-edge security measures
 
 - 📦 **Seamless Product Experience**:
-
   - Detailed product descriptions
   - High-resolution product imagery
   - Intuitive navigation across categories
 
 - 🛒 **Advanced Cart Functionality**:
-
   - Flexible quantity management
   - Easy add/remove product capabilities
   - Real-time cart updates
 
 - 💳 **Smooth Checkout Process**:
-
   - Streamlined payment page
   - Order confirmation system
   - Secure transaction handling
 
 - 👑 **Admin Capabilities**:
-
   - Product addition and modification
   - Inventory management tools
 
@@ -108,6 +103,27 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 
 - **Node.js**: Robust server-side runtime
 - **JSON Server**: Lightweight data management
+
+---
+
+## 🚀 Deployment
+
+### 1. Build for Production
+
+Run the build script to generate a production-ready build folder:
+
+```bash
+npm run build
+```
+
+### 2. Deploy to Vercel/Netlify/Render
+
+1. Connect your GitHub repository.
+2. Set the build command to `npm run build`.
+3. Set the output directory to `build`.
+4. Add your Supabase environment variables:
+   - `REACT_APP_SUPABASE_URL`
+   - `REACT_APP_SUPABASE_ANON_KEY`
 
 ---
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Navbar from "../Components/Home/Navbar";
+import NewNavbar from "../Components/Home/NewNavbar";
 import Footer from "../Components/Home/Footer";
 import { supabase } from "../lib/supabase";
 import { RootState } from "../types";
@@ -24,7 +24,7 @@ interface UserProfile {
 
 const Account: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuth, user } = useSelector((state: RootState) => state.AuthReducer);
+  const { isAuth, user, isAdmin } = useSelector((state: RootState) => state.AuthReducer);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -132,7 +132,7 @@ const Account: React.FC = () => {
   if (isLoading) {
     return (
       <>
-        <Navbar />
+        <NewNavbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
         </div>
@@ -143,7 +143,7 @@ const Account: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <NewNavbar />
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -262,13 +262,13 @@ const Account: React.FC = () => {
                         <p className="font-medium">
                           {profile?.created_at
                             ? new Date(profile.created_at).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                              )
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )
                             : "N/A"}
                         </p>
                       </div>
@@ -294,6 +294,14 @@ const Account: React.FC = () => {
                     </div>
 
                     <div className="space-y-3">
+                      {isAdmin && (
+                        <button
+                          onClick={() => navigate("/admin")}
+                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 px-4 rounded-lg font-bold shadow-md transition-all transform hover:-translate-y-0.5"
+                        >
+                          Go to Admin Dashboard
+                        </button>
+                      )}
                       <button
                         onClick={() => navigate("/order-history")}
                         className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"

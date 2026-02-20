@@ -8,8 +8,8 @@ import {
   CART_REQUEST_FAILURE,
   CLEAR_CART,
   LOAD_CART,
-} from "./actionTypes";
-import { CartState, CartItem } from "../../types";
+} from './actionTypes';
+import { CartState, CartItem } from '../../types';
 
 const initialState: CartState = {
   items: [], // This will be our single source of truth for cart items
@@ -25,10 +25,13 @@ interface CartAction {
 }
 
 const calculateTotal = (items: CartItem[]): number => {
-  return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
 };
 
-export const reducer = (state = initialState, { type, payload }: CartAction): CartState => {
+export const reducer = (
+  state = initialState,
+  { type, payload }: CartAction,
+): CartState => {
   switch (type) {
     case CART_REQUEST_PENDING:
       return {
@@ -45,7 +48,7 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
         // Ensure we have a valid array
         items: Array.isArray(state.items) ? state.items : [],
         cartItems: Array.isArray(state.items) ? state.items : [],
-        total: calculateTotal(Array.isArray(state.items) ? state.items : [])
+        total: calculateTotal(Array.isArray(state.items) ? state.items : []),
       };
 
     case CART_REQUEST_FAILURE:
@@ -58,85 +61,83 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
     case LOAD_CART:
       // Ensure payload is an array and transform it if needed
       const cartItems = Array.isArray(payload) ? payload : [payload];
-      console.log('[cartReducer] LOAD_CART with items:', cartItems);
+
       return {
         ...state,
         items: cartItems,
         cartItems: cartItems, // For backward compatibility
         total: calculateTotal(cartItems),
         isLoading: false,
-        error: null
+        error: null,
       };
 
     case ADD_TO_CART:
-      console.log('[cartReducer] ADD_TO_CART with payload:', payload);
-      
       // If payload is an array, replace the entire cart
       if (Array.isArray(payload)) {
-        const newItems = payload.map(item => ({
+        const newItems = payload.map((item) => ({
           ...item,
           // Ensure quantity is always a number
-          quantity: typeof item.quantity === 'number' ? item.quantity : 1
+          quantity: typeof item.quantity === 'number' ? item.quantity : 1,
         }));
-        
-        console.log('[cartReducer] Replacing cart with new items:', newItems);
-        
+
         return {
           ...state,
           items: newItems,
           cartItems: newItems, // For backward compatibility
           total: calculateTotal(newItems),
           isLoading: false,
-          error: null
+          error: null,
         };
       }
-      
+
       // Handle single item addition
-      const existingItemIndex = state.items.findIndex(item => 
+      const existingItemIndex = state.items.findIndex((item) =>
         // Use cart_item_id if available, otherwise fall back to id
-        (item.cart_item_id ? item.cart_item_id === payload.cart_item_id : item.id === payload.id)
+        item.cart_item_id
+          ? item.cart_item_id === payload.cart_item_id
+          : item.id === payload.id,
       );
-      
+
       let newItems;
-      
+
       if (existingItemIndex >= 0) {
         // Item exists, update quantity
         newItems = state.items.map((item, index) =>
           index === existingItemIndex
-            ? { 
-                ...item, 
+            ? {
+                ...item,
                 quantity: item.quantity + (payload.quantity || 1),
                 // Preserve cart_item_id if it exists
-                cart_item_id: item.cart_item_id || payload.cart_item_id
+                cart_item_id: item.cart_item_id || payload.cart_item_id,
               }
-            : item
+            : item,
         );
       } else {
         // New item, add to cart
         newItems = [
-          ...state.items, 
-          { 
-            ...payload, 
+          ...state.items,
+          {
+            ...payload,
             quantity: payload.quantity || 1,
             // Ensure we have a cart_item_id for new items
-            cart_item_id: payload.cart_item_id || `temp_${Date.now()}`
-          }
+            cart_item_id: payload.cart_item_id || `temp_${Date.now()}`,
+          },
         ];
       }
-      
-      console.log('[cartReducer] Updated cart items:', newItems);
-      
+
       return {
         ...state,
         items: newItems,
         cartItems: newItems, // For backward compatibility
         total: calculateTotal(newItems),
         isLoading: false,
-        error: null
+        error: null,
       };
 
     case REMOVE_FROM_CART:
-      const filteredItems = state.items.filter((item: CartItem) => item.id !== payload);
+      const filteredItems = state.items.filter(
+        (item: CartItem) => item.id !== payload,
+      );
       return {
         ...state,
         items: filteredItems,
@@ -146,7 +147,7 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
 
     case INCREMENT_QUANTITY:
       const incrementedItems = state.items.map((item: CartItem) =>
-        item.id === payload ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === payload ? { ...item, quantity: item.quantity + 1 } : item,
       );
       return {
         ...state,
@@ -159,7 +160,7 @@ export const reducer = (state = initialState, { type, payload }: CartAction): Ca
       const decrementedItems = state.items.map((item: CartItem) =>
         item.id === payload
           ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
+          : item,
       );
       return {
         ...state,
