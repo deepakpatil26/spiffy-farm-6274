@@ -1,3 +1,5 @@
 {
-    "editor.linkedEditing": true
+  "editor.linkedEditing": true,
+  "deno.enable": true,
+  "deno.enablePaths": ["supabase/functions"]
 }

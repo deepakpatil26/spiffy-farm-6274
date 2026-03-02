@@ -31,9 +31,7 @@ function escape(str) {
 
 async function generate() {
   try {
-    console.log('Fetching products from Platzi API...');
     const products = await fetchProducts();
-    console.log(`Fetched ${products.length} products.`);
 
     let sql = '-- IMPORT DATA FROM PLATZI API\n';
     sql +=
@@ -59,7 +57,6 @@ VALUES ('${escape(p.title)}', '${escape(slug)}', ${p.price}, '${escape(p.descrip
     });
 
     fs.writeFileSync(sqlFile, sql);
-    console.log('SQL script generated at:', sqlFile);
   } catch (err) {
     console.error('Error generating SQL:', err);
   }

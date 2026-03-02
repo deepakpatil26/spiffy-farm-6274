@@ -1,10 +1,10 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
 };
 
 interface AuthUser {
@@ -17,77 +17,159 @@ interface AuthUser {
   };
 }
 
-Deno.serve(async (req) => {
+// Check if user is admin (you can customize this logic)
+async function checkAdminRole(
+  supabaseAdmin: any,
+  userId: string,
+): Promise<boolean> {
+  try {
+    // Get user from auth.users
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.admin.getUserById(userId);
+
+    if (error || !user) {
+      return false;
+    }
+
+    // Check if user has admin role in user_metadata or custom claims
+    const adminEmails = (Deno.env.get('ADMIN_EMAILS') ?? '')
+      .split(',')
+      .map((email: string) => email.trim().toLowerCase())
+      .filter(Boolean);
+
+    const isAdminByRole =
+      user.user_metadata?.role === 'admin' ||
+      user.app_metadata?.role === 'admin';
+    const isAdminByEmail = adminEmails.includes((user.email ?? '').toLowerCase());
+    const isAdmin = isAdminByRole || isAdminByEmail;
+
+    return isAdmin;
+  } catch (error) {
+    return false;
+  }
+}
+
+Deno.serve(async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get the authorization header
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    // Create Supabase admin client with service role key
+    const url =
+      Deno.env.get('PROJECT_URL') ?? Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceKey =
+      Deno.env.get('PROJECT_SERVICE_ROLE_KEY') ??
+      Deno.env.get('SUPABASE_SERVICE_ROLE') ??
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ??
+      '';
+
+    if (!url || !serviceKey) {
       return new Response(
-        JSON.stringify({ error: "Missing authorization header" }),
+        JSON.stringify({
+          error: 'Server configuration error: missing Supabase credentials',
+        }),
         {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       );
     }
 
-    // Create Supabase client with service role key for admin operations
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const supabaseAdmin = createClient(url, serviceKey);
+    const authHeader =
+      req.headers.get('authorization') ?? req.headers.get('Authorization');
 
-    // Verify the user making the request is authenticated
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Missing or invalid authorization header' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
 
+    const token = authHeader.replace('Bearer ', '').trim();
     const {
-      data: { user },
+      data: { user: requestingUser },
       error: authError,
-    } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    } = await supabaseAdmin.auth.getUser(token);
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    if (authError || !requestingUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // TODO: Add additional admin role verification here if needed
-    // For now, any authenticated user can access this endpoint
-    // In production, you should verify the user has admin privileges
-
-    // Fetch all users using admin client
-    const { data: authUsers, error: usersError } =
-      await supabaseAdmin.auth.admin.listUsers();
-
-    if (usersError) {
-      throw usersError;
+    const isAdmin = await checkAdminRole(supabaseAdmin, requestingUser.id);
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Transform the data to match the expected format
-    const users: AuthUser[] = authUsers.users.map((user) => ({
-      id: user.id,
-      email: user.email || "",
-      created_at: user.created_at,
-      user_metadata: user.user_metadata || {},
-    }));
+    // Handle GET request - List all users
+    if (req.method === 'GET') {
+      const { data: authUsers, error: usersError } =
+        await supabaseAdmin.auth.admin.listUsers();
 
-    return new Response(JSON.stringify({ users }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (usersError) {
+        throw usersError;
+      }
+
+      const users: AuthUser[] = authUsers.users.map((user: any) => ({
+        id: user.id,
+        email: user.email || '',
+        created_at: user.created_at,
+        user_metadata: user.user_metadata || {},
+      }));
+
+      return new Response(JSON.stringify({ users }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle DELETE request - Delete a user
+    if (req.method === 'DELETE') {
+      const { userId } = await req.json();
+
+      if (!userId) {
+        return new Response(JSON.stringify({ error: 'User ID is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Delete the user
+      const { error: deleteError } =
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      return new Response(
+        JSON.stringify({ message: 'User deleted successfully', userId }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
+
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error("Error in admin-users function:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

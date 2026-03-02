@@ -1,8 +1,15 @@
+require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = 'https://butgdlroubygbwncfvht.supabase.co';
-const supabaseAnonKey =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1dGdkbHJvdWJ5Z2J3bmNmdmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzMzA5MjcsImV4cCI6MjA4NjkwNjkyN30.SeRmpP2N6jPV5-mkqe-_UQ5ocfTK3uHFfYMm2_DXQWk';
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error(
+    'Missing Supabase environment variables. Please check your .env.local file.',
+  );
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -14,14 +21,9 @@ async function checkData() {
     console.error('Error fetching data:', error);
     return;
   }
-  console.log('Total Products:', count);
   if (data && data.length > 0) {
-    console.log(
-      'Sample Data (First Product):',
-      JSON.stringify(data[0], null, 2),
-    );
+    // Data loaded, silently proceed
   } else {
-    console.log('NO DATA FOUND in products_data');
   }
 }
 

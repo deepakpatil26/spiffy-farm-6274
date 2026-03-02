@@ -53,9 +53,7 @@ export const Cart: React.FC = () => {
     setError(null);
     
     try {
-      console.log('[Cart] Loading cart for user:', user.id);
       await dispatch(loadCart(user.id) as any);
-      console.log('[Cart] Cart loaded successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch cart items';
       console.error('[Cart] Error loading cart:', error);
