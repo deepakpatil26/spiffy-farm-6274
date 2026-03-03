@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
@@ -40,7 +40,7 @@ const ManageUsers: React.FC = () => {
     return message;
   };
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -98,11 +98,11 @@ const ManageUsers: React.FC = () => {
       );
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [getData]);
 
   const deleteUser = async (userId: string) => {
     if (
