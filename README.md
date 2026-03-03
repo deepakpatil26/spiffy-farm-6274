@@ -56,9 +56,6 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 
 ## 🖼️ Project Snapshots
 
-<details>
-<summary>🖱️ Click to Explore Project Screenshots</summary>
-
 ### 🏠 Homepage
 
 ![Homepage](https://user-images.githubusercontent.com/94694221/230531061-518219f4-c2f9-4dd7-910e-8313201a7d68.png)
@@ -86,8 +83,6 @@ Introducing a meticulously crafted clone of Lifestyle Stores - India's premier f
 ### 🏷️ Final Order Confirmation
 
 ![Order Confirmation](https://user-images.githubusercontent.com/94694221/230531109-4f55952e-e0b8-4254-ad7e-933937152057.png)
-
-</details>
 
 ---
 
@@ -133,17 +128,23 @@ npm run build
 
 1. 🍴 **Fork the Repository**
 2. 🌿 **Create Feature Branch**
+
    ```bash
    git checkout -b feature/AmazingFeature
    ```
+
 3. 💾 **Commit Changes**
+
    ```bash
    git commit -m 'Add some AmazingFeature'
    ```
+
 4. 📤 **Push to Branch**
+
    ```bash
    git push origin feature/AmazingFeature
    ```
+
 5. 🔀 **Open Pull Request**
 
 ---
@@ -158,8 +159,8 @@ Inspired by Lifestyle Stores, a Landmark Group company, this project aims to rep
 
 More than just a clone, this project represents a journey of learning, innovation, and passion for creating exceptional digital experiences! 🏆
 
-**Happy Shopping! 👗🛒**
+## Happy Shopping! 👗🛒
 
 ---
 
-**Crafted with ❤️ by Passionate Developers**
+## Crafted with ❤️ by Passionate Developers

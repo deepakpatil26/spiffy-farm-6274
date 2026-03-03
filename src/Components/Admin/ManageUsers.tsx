@@ -21,6 +21,25 @@ const ManageUsers: React.FC = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const getFunctionErrorMessage = async (
+    invokeError: any,
+    fallback: string,
+  ): Promise<string> => {
+    let message = invokeError?.message || fallback;
+    const context = invokeError?.context;
+
+    if (context?.json) {
+      try {
+        const body = await context.json();
+        message = body?.error || body?.message || message;
+      } catch {
+        // Keep default message when response body is not JSON.
+      }
+    }
+
+    return message;
+  };
+
   const getData = async () => {
     setIsLoading(true);
     setError(null);
@@ -62,7 +81,11 @@ const ManageUsers: React.FC = () => {
       );
 
       if (invokeError) {
-        throw new Error(invokeError.message || 'Failed to fetch users');
+        const detailedError = await getFunctionErrorMessage(
+          invokeError,
+          'Failed to fetch users',
+        );
+        throw new Error(detailedError);
       }
 
       const users = data?.users || [];
@@ -114,7 +137,11 @@ const ManageUsers: React.FC = () => {
         setSuccessMessage('User deleted successfully!');
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
-        setDeleteError(invokeError.message || 'Failed to delete user');
+        const detailedError = await getFunctionErrorMessage(
+          invokeError,
+          'Failed to delete user',
+        );
+        setDeleteError(detailedError);
       }
     } catch (err: any) {
       setDeleteError(err.message || 'Failed to delete user');
